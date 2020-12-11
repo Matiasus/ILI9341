@@ -22,29 +22,20 @@
 #ifndef __ILI9341_H__
 #define __ILI9341_H__
 
-  #ifndef PORT
-    #define PORT            PORTB
-  #endif
-  #ifndef DDR
-    #define DDR             DDRB
-  #endif
-  #ifndef ILI9341_CS_SD
-    #define ILI9341_CS_SD   3
-  #endif
-  #ifndef ILI9341_SCK
-    #define ILI9341_SCK     7
-  #endif
+  /* HARDWARE DEFINITION */
+  #define DDR_D0_D7         DDRD
+  #define PORT_D0_D7        PORTD
+  #define PIN_D0_D7         PIND
 
-  #ifndef HW_RESET_DDR
-    #define HW_RESET_DDR    DDRB
-  #endif
-  #ifndef HW_RESET_PORT
-    #define HW_RESET_PORT   PORTB
-  #endif
-  #ifndef HW_RESET_PIN
-    #define HW_RESET_PIN    0
-  #endif
+  #define DDR_CONTROL       DDRB
+  #define PORT_CONTROL      PORTB
+  #define PIN_RST           0
+  #define PIN_CS            1
+  #define PIN_RS            2
+  #define PIN_WR            3
+  #define PIN_RD            4
 
+  /* SOFTWARE DEFINITION */
   #define ILI9341_SUCCESS   0
   #define ILI9341_ERROR     1
   
