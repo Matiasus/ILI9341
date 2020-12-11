@@ -12,6 +12,9 @@
  *
  * @depend      spi, font
  * ---------------------------------------------------------------+
+ * @interface   8080-I/II Series Parallel Interface
+ * @pins        5V, 3.3V, GND, RST, CS, RS, WR, RD, D[7:0] 
+ *
  */
 
 #include <avr/pgmspace.h>
@@ -20,91 +23,97 @@
 #define __ILI9341_H__
 
   #ifndef PORT
-    #define PORT PORTB
+    #define PORT            PORTB
   #endif
   #ifndef DDR
-    #define DDR  DDRB
-  #endif
-  #ifndef ILI9341_DC_LD
-    #define ILI9341_DC_LD  1
-  #endif
-  #ifndef ILI9341_BL
-    #define ILI9341_BL     2
+    #define DDR             DDRB
   #endif
   #ifndef ILI9341_CS_SD
-    #define ILI9341_CS_SD  3
+    #define ILI9341_CS_SD   3
   #endif
-  #ifndef ILI9341_CS_LD
-    #define ILI9341_CS_LD  4
-  #endif
-  #ifndef ILI9341_MOSI         // SDA
-    #define ILI9341_MOSI   5
-  #endif
-  #ifndef ILI9341_MISO
-    #define ILI9341_MISO   6
-  #endif
-  #ifndef ILI9341_SCK         // SCL
-    #define ILI9341_SCK    7
+  #ifndef ILI9341_SCK
+    #define ILI9341_SCK     7
   #endif
 
   #ifndef HW_RESET_DDR
-    #define HW_RESET_DDR  DDRB
+    #define HW_RESET_DDR    DDRB
   #endif
   #ifndef HW_RESET_PORT
-    #define HW_RESET_PORT PORTB
+    #define HW_RESET_PORT   PORTB
   #endif
   #ifndef HW_RESET_PIN
-    #define HW_RESET_PIN  0
+    #define HW_RESET_PIN    0
   #endif
 
-  #define ILI9341_SUCCESS 0
-  #define ILI9341_ERROR   1
+  #define ILI9341_SUCCESS   0
+  #define ILI9341_ERROR     1
   
-  #define NOP             0x00
-  #define SWRESET         0x01
-  #define RDDID           0x04
-  #define RDDST           0x09
+  #define ILI9341_NOOPR     0x00  // No Operation
+  #define ILI9341_SWRST     0x01  // Software Reset
+  #define ILI9341_RDDID     0x04  // Read Display Identification Information
+  #define ILI9341_RDDST     0x09  // Read Display Status
+  #define ILI9341_RDPMD     0x0A  // Read Display Power Mode
+  #define ILI9341_RMDCT     0x0B  // Read Display MADCTL
+  #define ILI9341_RDPFT     0x0C  // Read Display Pixel Format
+  #define ILI9341_RDIFT     0x0D  // Read Display Image Format
+  #define ILI9341_RDSMD     0x0E  // Read Display Signal Mode
+  #define ILI9341_RDSDR     0x0F  // Read Display Self Diagnostics Result
 
-  #define SLPIN           0x10
-  #define SLPOUT          0x11
-  #define PTLON           0x12
-  #define NORON           0x13
+  #define ILI9341_SLPIN     0x10  // Enter Sleep Mode
+  #define ILI9341_SLOUT     0x11  // Sleep Out
+  #define ILI9341_PTLON     0x12  // Partial Mode On
+  #define ILI9341_NORON     0x13  // Normal Display On
 
-  #define INVOFF          0x20
-  #define INVON           0x21
-  #define DISPOFF         0x28
-  #define DISPON          0x29
-  #define RAMRD           0x2E
-  #define CASET           0x2A
-  #define RASET           0x2B
-  #define RAMWR           0x2C
+  #define ILI9341_INOFF     0x20  // Dislpay Inversion Off
+  #define ILI9341_INVON     0x21  // Dislpay Inversion On
+  #define ILI9341_GAMST     0x26  // Gamma Set  
+  #define ILI9341_DIOFF     0x28  // Display OFF
+  #define ILI9341_DISON     0x29  // Display ON
+  #define ILI9341_CASET     0x2A  // Column Address Set
+  #define ILI9341_PASET     0x2B  // Page Address Set
+  #define ILI9341_MEMWR     0x2C  // Memory Write
+  #define ILI9341_COLST     0x2D  // Color Set
+  #define ILI9341_MEMRD     0x2E  // Memory Read
 
-  #define PTLAR           0x30
-  #define MADCTL          0x36
-  #define COLMOD          0x3A
+  #define ILI9341_PTLAR     0x30  // Partial Area
+  #define ILI9341_VSDEF     0x33  // Vertical Scroll Definition
+  #define ILI9341_TELOF     0x34  // Tearing Effect Line OFF
+  #define ILI9341_TELON     0x35  // Tearing Effect Line ON
+  #define ILI9341_MEMAC     0x36  // Memory Access Control
+  #define ILI9341_VSSAD     0x37  // Vertical Scrolling Start Address
+  #define ILI9341_IDLOF     0x38  // Idle Mode OFF
+  #define ILI9341_IDLON     0x39  // Idle Mode ON
+  #define ILI9341_PFSET     0x3A  // Pixel Format Set
+  #define ILI9341_WMCON     0x3C  // Write Memory Continue
+  #define ILI9341_RMCON     0x3E  // Read Memory Continue
 
-  #define FRMCTR1         0xB1
-  #define FRMCTR2         0xB2
-  #define FRMCTR3         0xB3
-  #define INVCTR          0xB4
-  #define DISSET5         0xB6
+  #define ILI9341_RGBIC     0xB0  // RGB Interface Signal Control
+  #define ILI9341_FRCRN     0xB1  // Frame Control (In Normal Mode)
+  #define ILI9341_FRCRI     0xB2  // Frame Control (In Idle Mode)
+  #define ILI9341_FRCRP     0xB3  // Frame Control (In Partial Mode)
+  #define ILI9341_INVCR     0xB4  // Display Inversion Control
+  #define ILI9341_BLPCR     0xB5  // Blanking Porch Control
+  #define ILI9341_DISCR     0xB6  // Display Function Control
+  #define ILI9341_EMSET     0xB7  // Entry Mode Set
+  #define ILI9341_BKCR1     0xB8  // Backlight Control 1
+  #define ILI9341_BKCR2     0xB9  // Backlight Control 2
+  #define ILI9341_BKCR3     0xBA  // Backlight Control 3
+  #define ILI9341_BKCR4     0xBB  // Backlight Control 4
+  #define ILI9341_BKCR5     0xBC  // Backlight Control 5
+  #define ILI9341_BKCR7     0xBE  // Backlight Control 7
+  #define ILI9341_BKCR8     0xBF  // Backlight Control 8
 
-  #define PWCTR1          0xC0
-  #define PWCTR2          0xC1
-  #define PWCTR3          0xC2
-  #define PWCTR4          0xC3
-  #define PWCTR5          0xC4
-  #define VMCTR1          0xC5
+  #define ILI9341_PWCR1     0xC0  // Power Control 1
+  #define ILI9341_PWCR2     0xC1  // Power Control 2
+  #define ILI9341_VCCR1     0xC5  // VCOM Control 1
+  #define ILI9341_VCCR2     0xC6  // VCOM Control 2
+ 
+  #define ILI9341_RDID1     0xDA  // Read ID1
+  #define ILI9341_RDID2     0xDB  // Read ID2
+  #define ILI9341_RDID3     0xDC  // Read ID3
 
-  #define RDID1           0xDA
-  #define RDID2           0xDB
-  #define RDID3           0xDC
-  #define RDID4           0xDD
-
-  #define GMCTRP1         0xE0
-  #define GMCTRN1         0xE1
-
-  #define PWCTR6          0xFC
+  #define ILI9341_POGCR     0xE0  // Positive Gamma Correction
+  #define ILI9341_NEGCO     0xE1  // Neagtove Gamma Correction
 
   // Colors
   #define BLACK           0x0000
