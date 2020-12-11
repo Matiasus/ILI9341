@@ -22,11 +22,15 @@
 #ifndef __ILI9341_H__
 #define __ILI9341_H__
 
-  /* HARDWARE DEFINITION */
+  // HARDWARE DEFINITION
+  // 
+  // Data
+  // ---------------------------------------------------------------
   #define DDR_D0_D7         DDRD
   #define PORT_D0_D7        PORTD
   #define PIN_D0_D7         PIND
-
+  // Control 
+  // ---------------------------------------------------------------
   #define DDR_CONTROL       DDRB
   #define PORT_CONTROL      PORTB
   #define PIN_RST           0
@@ -35,10 +39,8 @@
   #define PIN_WR            3
   #define PIN_RD            4
 
-  /* SOFTWARE DEFINITION */
-  #define ILI9341_SUCCESS   0
-  #define ILI9341_ERROR     1
-  
+  // COMMAND DEFINITION
+  // ---------------------------------------------------------------
   #define ILI9341_NOOPR     0x00  // No Operation
   #define ILI9341_SWRST     0x01  // Software Reset
   #define ILI9341_RDDID     0x04  // Read Display Identification Information
@@ -49,12 +51,12 @@
   #define ILI9341_RDIFT     0x0D  // Read Display Image Format
   #define ILI9341_RDSMD     0x0E  // Read Display Signal Mode
   #define ILI9341_RDSDR     0x0F  // Read Display Self Diagnostics Result
-
+  // ---------------------------------------------------------------
   #define ILI9341_SLPIN     0x10  // Enter Sleep Mode
   #define ILI9341_SLOUT     0x11  // Sleep Out
   #define ILI9341_PTLON     0x12  // Partial Mode On
   #define ILI9341_NORON     0x13  // Normal Display On
-
+  // ---------------------------------------------------------------
   #define ILI9341_INOFF     0x20  // Dislpay Inversion Off
   #define ILI9341_INVON     0x21  // Dislpay Inversion On
   #define ILI9341_GAMST     0x26  // Gamma Set  
@@ -65,7 +67,7 @@
   #define ILI9341_MEMWR     0x2C  // Memory Write
   #define ILI9341_COLST     0x2D  // Color Set
   #define ILI9341_MEMRD     0x2E  // Memory Read
-
+  // ---------------------------------------------------------------
   #define ILI9341_PTLAR     0x30  // Partial Area
   #define ILI9341_VSDEF     0x33  // Vertical Scroll Definition
   #define ILI9341_TELOF     0x34  // Tearing Effect Line OFF
@@ -77,7 +79,7 @@
   #define ILI9341_PFSET     0x3A  // Pixel Format Set
   #define ILI9341_WMCON     0x3C  // Write Memory Continue
   #define ILI9341_RMCON     0x3E  // Read Memory Continue
-
+  // ---------------------------------------------------------------
   #define ILI9341_RGBIC     0xB0  // RGB Interface Signal Control
   #define ILI9341_FRCRN     0xB1  // Frame Control (In Normal Mode)
   #define ILI9341_FRCRI     0xB2  // Frame Control (In Idle Mode)
@@ -93,18 +95,23 @@
   #define ILI9341_BKCR5     0xBC  // Backlight Control 5
   #define ILI9341_BKCR7     0xBE  // Backlight Control 7
   #define ILI9341_BKCR8     0xBF  // Backlight Control 8
-
+  // ---------------------------------------------------------------
   #define ILI9341_PWCR1     0xC0  // Power Control 1
   #define ILI9341_PWCR2     0xC1  // Power Control 2
   #define ILI9341_VCCR1     0xC5  // VCOM Control 1
   #define ILI9341_VCCR2     0xC6  // VCOM Control 2
- 
+   // ---------------------------------------------------------------
   #define ILI9341_RDID1     0xDA  // Read ID1
   #define ILI9341_RDID2     0xDB  // Read ID2
   #define ILI9341_RDID3     0xDC  // Read ID3
-
+  // ---------------------------------------------------------------
   #define ILI9341_POGCR     0xE0  // Positive Gamma Correction
   #define ILI9341_NEGCO     0xE1  // Neagtove Gamma Correction
+
+  // SOFTWARE DEFINITION
+  // ---------------------------------------------------------------
+  #define ILI9341_SUCCESS      0
+  #define ILI9341_ERROR        1
 
   // Colors
   #define BLACK           0x0000
@@ -113,19 +120,15 @@
 
   // MV = 0 in MADCTL
   // max columns
-  #define MAX_X   161
+  #define MAX_X              161
   // max rows
-  #define MAX_Y   130
+  #define MAX_Y              130
   // columns max counter
-  #define SIZE_X  MAX_X - 1
+  #define SIZE_X       MAX_X - 1
   // rows max counter
-  #define SIZE_Y  MAX_Y - 1
+  #define SIZE_Y       MAX_Y - 1
   // whole pixels
   #define CACHE_SIZE_MEM (MAX_X * MAX_Y)
-  // number of columns for chars
-  #define CHARS_COLS_LEN 5
-  // number of rows for chars
-  #define CHARS_ROWS_LEN 8
 
   /** @const Command list ILI9341B */
   extern const uint8_t INIT_ILI9341[];
