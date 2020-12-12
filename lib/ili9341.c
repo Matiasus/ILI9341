@@ -22,52 +22,12 @@
 /** @array Init command */
 const uint8_t INIT_ILI9341[] PROGMEM = {
   // number of initializers
-  5,
+  2,
   // ---------------------------------------
-  // Software reset - no arguments,  delay
-  0, 150, SWRESET,
-  // Out of sleep mode, no arguments, delay
-  0, 200, SLPOUT,  
-  // Set color mode, 1 argument delay
-  1,  10, COLMOD, 0x05,
-  // D7  D6  D5  D4  D3  D2  D1  D0
-  // MY  MX  MV  ML RGB  MH   -   -
-  // ------------------------------
-  // ------------------------------
-  // MV  MX  MY -> {MV (row / column exchange) MX (column address order), MY (row address order)}
-  // ------------------------------
-  //  0   0   0 -> begin left-up corner, end right-down corner 
-  //               left-right (normal view) 
-  //  0   0   1 -> begin left-down corner, end right-up corner 
-  //               left-right (Y-mirror)
-  //  0   1   0 -> begin right-up corner, end left-down corner 
-  //               right-left (X-mirror)
-  //  0   1   1 -> begin right-down corner, end left-up corner
-  //               right-left (X-mirror, Y-mirror)
-  //  1   0   0 -> begin left-up corner, end right-down corner
-  //               up-down (X-Y exchange)  
-  //  1   0   1 -> begin left-down corner, end right-up corner
-  //               down-up (X-Y exchange, Y-mirror)
-  //  1   1   0 -> begin right-up corner, end left-down corner 
-  //               up-down (X-Y exchange, X-mirror)  
-  //  1   1   1 -> begin right-down corner, end left-up corner
-  //               down-up (X-Y exchange, X-mirror, Y-mirror)
-  // ------------------------------
-  //  ML: vertical refresh order 
-  //      0 -> refresh top to bottom 
-  //      1 -> refresh bottom to top
-  // ------------------------------
-  // RGB: filter panel
-  //      0 -> RGB 
-  //      1 -> BGR        
-  // ------------------------------ 
-  //  MH: horizontal refresh order 
-  //      0 -> refresh left to right 
-  //      1 -> refresh right to left
-  // 0xA0 = 1010 0000
-  1,   0, MADCTL, 0xA0,
-  // Main screen turn on
-  0, 200, DISPON 
+  // 0x01 -> Software reset
+  0, ILI9341_SWRST,
+  // 0x29 -> Display on
+  0, ILI9341_DISON
   // ---------------------------------------
 };
 
@@ -75,3 +35,116 @@ const uint8_t INIT_ILI9341[] PROGMEM = {
 unsigned short int cacheMemIndexRow = 0;
 /** @var array Chache memory char index column */
 unsigned short int cacheMemIndexCol = 0;
+
+/**
+ * @desc    LCD init
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void ILI9341_Init (void)
+{
+  // variables
+  const uint8_t *commands = INIT_ILI9341;
+  // number of commands
+  unsigned short int no_of_commands = pgm_read_byte(commands++);
+  // argument
+  char no_of_arguments;
+  // command
+  char command;
+
+  // loop throuh commands
+  while (no_of_commands) {
+
+    // number of arguments
+    no_of_arguments = pgm_read_byte(commands++);
+    // command
+    command = pgm_read_byte(commands++);
+
+    // send command
+    // -------------------------    
+    ILI9341_TransmitCmmd(command);
+
+    // send arguments
+    // -------------------------
+    while (no_of_arguments--) {
+      // send command
+    }
+    // decrement
+    no_of_commands--;
+  }
+}
+
+/**
+ * @desc    LCD Transmit Command
+ *
+ * @param   char
+ *
+ * @return  void
+ */
+void ILI9341_TransmitCmmd (char cmmd)
+{
+  // enable chip select -> LOW
+  ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_CS);
+  // D/C -> LOW
+  ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_RS);
+
+  // Write data timing diagram
+  // --------------------------------------------
+  //         __    __
+  // WR        \__/
+  //             ___
+  // D0 - D7  __/   \__
+
+  // WR -> LOW
+  ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_WR);
+  // set data onn PORT
+  ILI9341_PORT_DATA = cmmd;
+  // WR -> HIGH
+  ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_WR);
+
+  // D/C -> HIGH
+  ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_RS);
+  // disable chip select -> HIGH
+  ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_CS); 
+}
+
+/**
+ * @desc    LCD transmit
+ *
+ * @param   char
+ * @param   char
+ *
+ * @return  void
+ */
+void ILI9341_TransmitData (char data)
+{
+}
+
+/**
+ * @desc    LCD init PORTs
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void ILI9341_InitPorts (void)
+{
+  // set control pins as output
+  ILI9341_DDR_CONTROL = ILI9341_DDR_CONTROL |
+    (1 << ILI9341_PIN_RST) | 
+    (1 << ILI9341_PIN_WR)  | 
+    (1 << ILI9341_PIN_RS)  | 
+    (1 << ILI9341_PIN_RD)  | 
+    (1 << ILI9341_PIN_WR);
+  // set HIGH Level on all pins
+  ILI9341_PORT_CONTROL = ILI9341_PORT_CONTROL |
+    (1 << ILI9341_PIN_RST) | 
+    (1 << ILI9341_PIN_WR)  | 
+    (1 << ILI9341_PIN_RS)  | 
+    (1 << ILI9341_PIN_RD)  | 
+    (1 << ILI9341_PIN_WR);
+  // set all pins as output
+  ILI9341_DDR_DATA = 0xFF;
+}
