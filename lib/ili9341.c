@@ -132,7 +132,7 @@ void ILI9341_Init (void)
   // delay
   unsigned short int delay;
 
-  // Init ports
+  // Init ports with Reset
   ILI9341_InitPortsWithRES();
 
   // loop throuh commands
@@ -190,12 +190,12 @@ void ILI9341_TransmitCmmd (char cmmd)
   //             ___
   // D0 - D7  __/   \__
 
-  // WR -> LOW
-  ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_WR);
   // set command on PORT
   ILI9341_PORT_DATA = cmmd;
-  // WR -> HIGH
+  // WR -> LOW
   ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_WR);
+  // WR -> HIGH
+  ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_WR);
 
   // D/C -> HIGH
   ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_RS);
@@ -224,12 +224,12 @@ void ILI9341_TransmitData (char data)
   //             ___
   // D0 - D7  __/   \__
 
-  // WR -> LOW
-  ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_WR);
   // set data on PORT
   ILI9341_PORT_DATA = data;
-  // WR -> HIGH
+  // WR -> LOW
   ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_WR);
+  // WR -> HIGH
+  ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_WR);
 
   // disable chip select -> HIGH
   ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_CS);
