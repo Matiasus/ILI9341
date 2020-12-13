@@ -28,15 +28,16 @@ const uint8_t INIT_ILI9341[] PROGMEM = {
 
   // number of initializers
   // --------------------------------------------
-  13,
+  14,
 
   // 0x01 -> Software reset
   // --------------------------------------------  
-  0,   5, ILI9341_SWRST,
+  // t > 5ms
+  0,   10, ILI9341_SWRESET,
 
   // 0x28 -> Display OFF
   // --------------------------------------------
-  0,   0, ILI9341_DIOFF,
+  0,   0, ILI9341_DISPOFF,
 
   // 0xC0 -> Power Control 1
   // --------------------------------------------
@@ -62,18 +63,18 @@ const uint8_t INIT_ILI9341[] PROGMEM = {
   // 0x3A -> Pixel Format Set
   // --------------------------------------------
   // 0x55 -> 16 bits/ pixel
-  1,   0, ILI9341_PFSET, 0x55,
+  1,   0, ILI9341_COLMOD, 0x55,
 
   // 0xB1 -> Frame Rate Control
   // --------------------------------------------
   // 0x00 -> focs / 1
   // 0xB1 -> 70Hz
-  2,   0, ILI9341_FRCRN, 0x00, 0x1B,
+  2,   0, ILI9341_FRMCRN1, 0x00, 0x1B,
 
   // 0x26 -> Gamma Set
   // --------------------------------------------
   // 0x01 -> Gamma curve 1
-  2,   0, ILI9341_GAMST, 0x00, 0x1B, 
+  2,   0, ILI9341_GAMSET, 0x00, 0x1B, 
 
   // 0xB7 -> Entry Mode Set
   // --------------------------------------------
@@ -81,7 +82,7 @@ const uint8_t INIT_ILI9341[] PROGMEM = {
   // DSTB = 0 -> Deep Standby Mode disable
   // GON:DTE = 1 1 -> Normal Display
   // GAS = 1 -> Low Voltage Detec. disable
-  1,   0, ILI9341_EMSET, 0x07,
+  1,   0, ILI9341_ETMOD, 0x07,
 
   // 0xB6 -> Display Function Control
   // --------------------------------------------
@@ -91,13 +92,52 @@ const uint8_t INIT_ILI9341[] PROGMEM = {
   // 0x00 -> 0 0 PCDIV[5:0]
   4,   0, ILI9341_DISCR, 0x0A, 0x82, 0x27, 0x00,
 
+  // 0x36 -> Memory Access Control
+  // --------------------------------------------
+  // D7  D6  D5  D4  D3  D2  D1  D0
+  // MY  MX  MV  ML RGB  MH   -   -
+  // ------------------------------
+  // ------------------------------
+  // MV  MX  MY -> {MV (row / column exchange) MX (column address order), MY (row address order)}
+  // ------------------------------
+  //  0   0   0 -> begin left-up corner, end right-down corner 
+  //               left-right (normal view) 
+  //  0   0   1 -> begin left-down corner, end right-up corner 
+  //               left-right (Y-mirror)
+  //  0   1   0 -> begin right-up corner, end left-down corner 
+  //               right-left (X-mirror)
+  //  0   1   1 -> begin right-down corner, end left-up corner
+  //               right-left (X-mirror, Y-mirror)
+  //  1   0   0 -> begin left-up corner, end right-down corner
+  //               up-down (X-Y exchange)  
+  //  1   0   1 -> begin left-down corner, end right-up corner
+  //               down-up (X-Y exchange, Y-mirror)
+  //  1   1   0 -> begin right-up corner, end left-down corner 
+  //               up-down (X-Y exchange, X-mirror)  
+  //  1   1   1 -> begin right-down corner, end left-up corner
+  //               down-up (X-Y exchange, X-mirror, Y-mirror)
+  // ------------------------------
+  //  ML: vertical refresh order 
+  //      0 -> refresh top to bottom 
+  //      1 -> refresh bottom to top
+  // ------------------------------
+  // RGB: filter panel
+  //      0 -> RGB 
+  //      1 -> BGR        
+  // ------------------------------ 
+  //  MH: horizontal refresh order 
+  //      0 -> refresh left to right 
+  //      1 -> refresh right to left 
+  1,   0, ILI9341_MADCTL, 0x00,
+
   // 0x11 -> Sleep Out
   // --------------------------------------------
-  0, 100, ILI9341_SLOUT,
+  // t > 120ms
+  0, 150, ILI9341_SLPOUT,
 
   // 0x29 -> Display on
   // --------------------------------------------
-  0,  20, ILI9341_DISON
+  0,  20, ILI9341_DISPON
 };
 
 /** @var array Chache memory char index row */
@@ -185,10 +225,10 @@ void ILI9341_TransmitCmmd (char cmmd)
 
   // Write data timing diagram
   // --------------------------------------------
-  //         __    __
-  // WR        \__/
   //             ___
   // D0 - D7  __/   \__
+  //         __    __
+  // WR        \__/
 
   // set command on PORT
   ILI9341_PORT_DATA = cmmd;
