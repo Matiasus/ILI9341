@@ -26,9 +26,9 @@
   // 
   // Data
   // ---------------------------------------------------------------
-  #define ILI9341_PORT_DATA     PORTC
-  #define ILI9341_DDR_DATA      DDRC
-  #define ILI9341_PIN_DATA      PINC
+  #define ILI9341_PORT_DATA     PORTD
+  #define ILI9341_DDR_DATA      DDRD
+  #define ILI9341_PIN_DATA      PIND
   // Control 
   // ---------------------------------------------------------------
   #define ILI9341_DDR_CONTROL   DDRB
@@ -99,7 +99,7 @@
   #define ILI9341_PWCR1         0xC0  // Power Control 1
   #define ILI9341_PWCR2         0xC1  // Power Control 2
   #define ILI9341_VCCR1         0xC5  // VCOM Control 1
-  #define ILI9341_VCCR2         0xC6  // VCOM Control 2
+  #define ILI9341_VCCR2         0xC7  // VCOM Control 2
    // ---------------------------------------------------------------
   #define ILI9341_RDID1         0xDA  // Read ID1
   #define ILI9341_RDID2         0xDB  // Read ID2
@@ -112,25 +112,22 @@
   // ---------------------------------------------------------------
   #define ILI9341_SUCCESS       0
   #define ILI9341_ERROR         1
-  #define ILI9341_DATA          1
-  #define ILI9341_COMMAND       0
 
   // Colors
-  #define BLACK                 0x0000
-  #define WHITE                 0xFFFF
-  #define RED                   0xF000
+  #define ILI9341_BLACK         0x0000
+  #define ILI9341_WHITE         0xFFFF
+  #define ILI9341_RED           0xF000
 
-  // MV = 0 in MADCTL
   // max columns
-  #define MAX_X                 240
+  #define ILI9341_MAX_X         240
   // max rows
-  #define MAX_Y                 320
+  #define ILI9341_MAX_Y         320
   // columns max counter
-  #define SIZE_X                MAX_X - 1
+  #define ILI9341_SIZE_X        ILI9341_MAX_X - 1
   // rows max counter
-  #define SIZE_Y                MAX_Y - 1
+  #define ILI9341_SIZE_Y        ILI9341_MAX_Y - 1
   // whole pixels
-  #define CACHE_SIZE_MEM        (MAX_X * MAX_Y)
+  #define ILI9341_CACHE_MEM     (ILI9341_MAX_X * ILI9341_MAX_Y)
 
   /** @const Command list ILI9341B */
   extern const uint8_t INIT_ILI9341[];
@@ -170,5 +167,14 @@
    * @return  void
    */
   void ILI9341_TransmitData (char);
+
+  /**
+   * @desc    Delay
+   *
+   * @param   unsigned short int
+   *
+   * @return  void
+   */
+  void ILI9341_Delay(unsigned short int);
 
 #endif
