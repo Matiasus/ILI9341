@@ -132,6 +132,9 @@ void ILI9341_Init (void)
   // delay
   unsigned short int delay;
 
+  // Init ports
+  ILI9341_InitPortsWithRES();
+
   // loop throuh commands
   while (no_of_commands--) {
 
@@ -239,7 +242,7 @@ void ILI9341_TransmitData (char data)
  *
  * @return  void
  */
-void ILI9341_InitPorts (void)
+void ILI9341_InitPortsWithRES (void)
 {
   // set control pins as output
   ILI9341_DDR_CONTROL = ILI9341_DDR_CONTROL |
@@ -260,6 +263,7 @@ void ILI9341_InitPorts (void)
     (1 << ILI9341_PIN_RS)  | 
     (1 << ILI9341_PIN_RD)  | 
     (1 << ILI9341_PIN_WR);
+
   // set all pins as output
   ILI9341_DDR_DATA = 0xFF;
 }

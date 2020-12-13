@@ -148,7 +148,7 @@
    *
    * @return  void
    */
-  void ILI9341_InitPorts (void);
+  void ILI9341_InitPortsWithRES (void);
 
   /**
    * @desc    LCD Transmit Command
