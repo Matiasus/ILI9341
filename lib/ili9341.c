@@ -25,15 +25,14 @@
 #include "ili9341.h"
 
 /** @array Init command */
-const uint8_t INIT_ILI9341[] PROGMEM = {
-
+const uint16_t INIT_ILI9341[] PROGMEM = {
   // number of initializers
-  21,
+  12,
 
   // --------------------------------------------  
-//  0,  10, ILI9341_SWRESET,                                      // 0x01 -> Software reset
-//  0,   0, ILI9341_DISPOFF,                                      // 0x28 -> Display OFF
-
+  0,  50, ILI9341_SWRESET,                                      // 0x01 -> Software reset
+  0,  10, ILI9341_DISPOFF,                                      // 0x28 -> Display OFF
+/*
   // --------------------------------------------
   3,   0, 0xEF, 0x03, 0x80, 0x02,                               // 0xEF
   3,   0, ILI9341_LCD_POWERB, 0x00, 0xC1, 0x30,                 // 0xCF -> Power control B
@@ -42,32 +41,34 @@ const uint8_t INIT_ILI9341[] PROGMEM = {
   5,   0, ILI9341_LCD_POWERA, 0x39, 0x2C, 0x00, 0x34, 0x02,     // 0xCB -> Power control A
   1,   0, ILI9341_LCD_PRC, 0x20,                                // 0xF7 -> Pump ratio control
   2,   0, ILI9341_LCD_DTCB, 0x00, 0x00,                         // 0xEA -> Driver timing control B
-
+*/
   // --------------------------------------------  
-  1,   0, ILI9341_PWCTRL1, 0x23,                                // 0xC0 -> Power Control 1
-  1,   0, ILI9341_PWCTRL2, 0x10,                                // 0xC1 -> Power Control 2
-  2,   0, ILI9341_VCCR1, 0x3E, 0x28,                            // 0xC5 -> VCOM Control 1
-  1,   0, ILI9341_VCCR2, 0xB6,                                  // 0xC7 -> VCOM Control 2
+  1,  10, ILI9341_PWCTRL1, 0x23,                                // 0xC0 -> Power Control 1
+  1,  10, ILI9341_PWCTRL2, 0x10,                                // 0xC1 -> Power Control 2
+  2,  10, ILI9341_VCCR1, 0x2B, 0x2B,                            // 0xC5 -> VCOM Control 1
+  1,  10, ILI9341_VCCR2, 0xC0,                                  // 0xC7 -> VCOM Control 2
 
   // -------------------------------------------- 
-  1,   0, ILI9341_MADCTL, 0x48,                                 // 0x36 -> Memory Access Control
-  1,   0, ILI9341_COLMOD, 0x55,                                 // 0x3A -> Pixel Format Set
-  2,   0, ILI9341_FRMCRN1, 0x00, 0x18,                          // 0xB1 -> Frame Rate Control
+  1,  10, ILI9341_MADCTL, 0x48,                                 // 0x36 -> Memory Access Control
+  1,  10, ILI9341_COLMOD, 0x55,                                 // 0x3A -> Pixel Format Set
+  2,  10, ILI9341_FRMCRN1, 0x00, 0x1B,                          // 0xB1 -> Frame Rate Control
+/*
   3,   0, ILI9341_DISCTRL, 0x08, 0x82, 0x27,                    // 0xB6 -> Display Function Control
   1,   0, 0xF2, 0x00,                                           // 0xF2 -> gamma function disable
   2,   0, ILI9341_GAMSET, 0x00, 0x1B,                           // 0x26 -> Gamma Set
-//  1,   0, ILI9341_ETMOD, 0x07,                                  // 0xB7 -> Entry Mode Set
-  
+*/
+  1,  10, ILI9341_ETMOD, 0x07,                                  // 0xB7 -> Entry Mode Set
+/*  
   // Set Gamma - positive
   15,  0, ILI9341_GMCTRP1 , 0x0F, 0x31, 0x2B, 0x0C, 0x0E, 0x08, 
     0x4E, 0xF1, 0x37, 0x07, 0x10, 0x03, 0x0E, 0x09, 0x00,
   // Set Gamma - negative
   15,  0, ILI9341_GMCTRN1 , 0x00, 0x0E, 0x14, 0x03, 0x11, 0x07, 
     0x31, 0xC1, 0x48, 0x08, 0x0F, 0x0C, 0x31, 0x36, 0x0F,
-
+*/
   // --------------------------------------------
   0, 150, ILI9341_SLPOUT,                                       // 0x11 -> Sleep Out
-  0,  20, ILI9341_DISPON                                        // 0x29 -> Display on
+  0, 500, ILI9341_DISPON                                        // 0x29 -> Display on
 };
 
 /** @var array Chache memory char index row */
@@ -92,7 +93,7 @@ void ILI9341_Init (void)
   SSD1306_ClearScreen();
 */  
   // variables
-  const uint8_t *commands = INIT_ILI9341;
+  const uint16_t *commands = INIT_ILI9341;
   // number of commands
   unsigned short int no_of_commands = pgm_read_byte(commands++);
   // arguments
@@ -149,9 +150,9 @@ void ILI9341_Init (void)
 void ILI9341_TransmitCmmd (char cmmd)
 {
   // D/C -> LOW
-  ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_RS);
+  CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RS);
   // enable chip select -> LOW
-  ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_CS);
+  CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS);
 
   // Write data timing diagram
   // --------------------------------------------
@@ -168,9 +169,9 @@ void ILI9341_TransmitCmmd (char cmmd)
   ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_WR);
 
   // D/C -> HIGH
-  ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_RS);
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RS);
   // disable chip select -> HIGH
-  ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_CS); 
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS); 
 }
 
 /**
@@ -183,9 +184,9 @@ void ILI9341_TransmitCmmd (char cmmd)
 void ILI9341_TransmitData (char data)
 {
   // D/C -> HIGH
-  ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_RS);
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RS);
   // enable chip select -> LOW
-  ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_CS);
+  CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS);
 
   // Write data timing diagram
   // --------------------------------------------
@@ -202,7 +203,7 @@ void ILI9341_TransmitData (char data)
   ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_WR);
 
   // disable chip select -> HIGH
-  ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_CS);
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS);
 }
 
 /**
@@ -215,11 +216,11 @@ void ILI9341_TransmitData (char data)
 void ILI9341_InitPortsWithRES (void)
 {
   // set control pins as output
-  ILI9341_DDR_CONTROL = ILI9341_DDR_CONTROL |
-    (1 << ILI9341_PIN_RST) | 
-    (1 << ILI9341_PIN_WR)  | 
-    (1 << ILI9341_PIN_RS)  | 
-    (1 << ILI9341_PIN_RD)  | 
+  ILI9341_DDR_CONTROL |= 
+    (1 << ILI9341_PIN_RST) |
+    (1 << ILI9341_PIN_WR)  |
+    (1 << ILI9341_PIN_RS)  |
+    (1 << ILI9341_PIN_RD)  |
     (1 << ILI9341_PIN_WR);
 
   // RESET
@@ -228,7 +229,7 @@ void ILI9341_InitPortsWithRES (void)
   ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_RST);
   // delay > 10us
   _delay_ms(1);
-  // set Reset HIGH
+  // set Reset LOW
   ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_RST);
   // delay > 10us
   _delay_ms(10);
@@ -238,10 +239,10 @@ void ILI9341_InitPortsWithRES (void)
   _delay_ms(120);
 
   // set HIGH Level on all pins
-  ILI9341_PORT_CONTROL |= ILI9341_PORT_CONTROL |
-    (1 << ILI9341_PIN_WR)  | 
-    (1 << ILI9341_PIN_RS)  | 
-    (1 << ILI9341_PIN_RD)  | 
+  ILI9341_PORT_CONTROL |= 
+    (1 << ILI9341_PIN_WR) | 
+    (1 << ILI9341_PIN_RS) | 
+    (1 << ILI9341_PIN_RD) | 
     (1 << ILI9341_PIN_WR);
 
   // set all pins as output

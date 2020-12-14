@@ -34,9 +34,9 @@
   #define ILI9341_DDR_CONTROL   DDRB
   #define ILI9341_PORT_CONTROL  PORTB
   #define ILI9341_PIN_RST       0
-  #define ILI9341_PIN_WR        1     // Write
+  #define ILI9341_PIN_WR        3     // Write
   #define ILI9341_PIN_RS        2     // Register Select -> D/C
-  #define ILI9341_PIN_CS        3     // Chip Select
+  #define ILI9341_PIN_CS        1     // Chip Select
   #define ILI9341_PIN_RD        4     // Read
 
   // COMMAND DEFINITION
@@ -119,6 +119,10 @@
   #define ILI9341_LCD_3GAMMA_EN 0xF2   // 3 Gamma enable register
   #define ILI9341_LCD_PRC       0xF7   // Pump ratio control register
 
+  // set bit
+  #define SETBIT(REG, BIT)      { REG |= (1 << BIT); }
+  // clear bit
+  #define CLRBIT(REG, BIT)      { REG &= ~(1 << BIT); }
 
   // SOFTWARE DEFINITION
   // ---------------------------------------------------------------
@@ -142,7 +146,7 @@
   #define ILI9341_CACHE_MEM     (ILI9341_MAX_X * ILI9341_MAX_Y)
 
   /** @const Command list ILI9341B */
-  extern const uint8_t INIT_ILI9341[];
+  extern const uint16_t INIT_ILI9341[];
 
   /**
    * @desc    LCD Init
