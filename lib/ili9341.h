@@ -31,13 +31,13 @@
   #define ILI9341_PIN_DATA      PIND
   // Control 
   // ---------------------------------------------------------------
-  #define ILI9341_DDR_CONTROL   DDRB
-  #define ILI9341_PORT_CONTROL  PORTB
-  #define ILI9341_PIN_RST       0
-  #define ILI9341_PIN_WR        3     // Write
+  #define ILI9341_DDR_CONTROL   DDRC
+  #define ILI9341_PORT_CONTROL  PORTC
+  #define ILI9341_PIN_RST       4
+  #define ILI9341_PIN_WR        1     // Write
   #define ILI9341_PIN_RS        2     // Register Select -> D/C
-  #define ILI9341_PIN_CS        1     // Chip Select
-  #define ILI9341_PIN_RD        4     // Read
+  #define ILI9341_PIN_CS        3     // Chip Select
+  #define ILI9341_PIN_RD        0     // Read
 
   // COMMAND DEFINITION
   // ---------------------------------------------------------------
@@ -123,6 +123,8 @@
   #define SETBIT(REG, BIT)      { REG |= (1 << BIT); }
   // clear bit
   #define CLRBIT(REG, BIT)      { REG &= ~(1 << BIT); }
+  // WR Impulse
+  #define WR_IMPULSE()          { ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_WR); ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_WR); }
 
   // SOFTWARE DEFINITION
   // ---------------------------------------------------------------
