@@ -85,13 +85,13 @@ unsigned short int cacheMemIndexCol = 0;
  */
 void ILI9341_Init (void)
 {
-/*
+
   char *txt = "ERRORISIS";
   // Init ssd1306 oled
   SSD1306_Init();
   // clear screen
   SSD1306_ClearScreen();
-*/  
+  
   // variables
   const uint16_t *commands = INIT_ILI9341;
   // number of commands
@@ -103,8 +103,11 @@ void ILI9341_Init (void)
   // delay
   unsigned short int delay;
 
-  // Init ports with Reset
-  ILI9341_InitPortsWithRES();
+  // Init hardware reset
+  ILI9341_HWReset();
+
+  // Init ports
+  ILI9341_InitPorts();
 
   // loop throuh commands
   while (no_of_commands--) {
@@ -115,11 +118,11 @@ void ILI9341_Init (void)
     delay = pgm_read_byte(commands++);
     // command
     command = pgm_read_byte(commands++);
-/*
+
     // string
-    sprintf(txt, "%x-%d ", command, no_of_arguments);
+    sprintf(txt, "%x-[", command);
     SSD1306_DrawString(txt);
-*/
+
     // send command
     // -------------------------    
     ILI9341_TransmitCmmd(command);
@@ -127,14 +130,17 @@ void ILI9341_Init (void)
     // send arguments
     // -------------------------
     while (no_of_arguments--) {
-/*
+
       // string
-      sprintf(txt, "[%x]", pgm_read_byte(commands));
+      sprintf(txt, "%x ", pgm_read_byte(commands));
       SSD1306_DrawString(txt);
-*/
+
       // send arguments
       ILI9341_TransmitData(pgm_read_byte(commands++));
     }
+
+    SSD1306_DrawString("] ");
+
     // delay
     ILI9341_Delay(delay);
   }
@@ -213,37 +219,47 @@ void ILI9341_TransmitData (char data)
  *
  * @return  void
  */
-void ILI9341_InitPortsWithRES (void)
+void ILI9341_HWReset (void)
 {
-  // set control pins as output
-  ILI9341_DDR_CONTROL |= 
-    (1 << ILI9341_PIN_RST) |
-    (1 << ILI9341_PIN_WR)  |
-    (1 << ILI9341_PIN_RS)  |
-    (1 << ILI9341_PIN_RD)  |
-    (1 << ILI9341_PIN_WR);
+  // set RESET as Output
+  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_RST);
 
-  // RESET
+  // RESET SEQUENCE
   // --------------------------------------------
   // set Reset HIGH
-  ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_RST);
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RST);
   // delay > 10us
   _delay_ms(1);
   // set Reset LOW
-  ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_RST);
+  CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RST);
   // delay > 10us
   _delay_ms(10);
   // set Reset HIGH
-  ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_RST);
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RST);
   // delay > 10us
-  _delay_ms(120);
+  _delay_ms(120);  
+}
 
-  // set HIGH Level on all pins
-  ILI9341_PORT_CONTROL |= 
-    (1 << ILI9341_PIN_WR) | 
-    (1 << ILI9341_PIN_RS) | 
-    (1 << ILI9341_PIN_RD) | 
-    (1 << ILI9341_PIN_WR);
+/**
+ * @desc    LCD init PORTs
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void ILI9341_InitPorts (void)
+{
+  // set control pins as output
+  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_WR);
+  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_RS);
+  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_RD);
+  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_WR);
+
+  // set HIGH Level on all pins - IDLE MODE
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_WR); 
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RS); 
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RD); 
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_WR);
 
   // set all pins as output
   ILI9341_DDR_DATA = 0xFF;

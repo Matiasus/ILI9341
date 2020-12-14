@@ -157,6 +157,15 @@
    */
   void ILI9341_Init (void);
 
+  /**
+   * @desc    LCD Hardware reset
+   *
+   * @param   void
+   *
+   * @return  void
+   */
+  void ILI9341_HWReset (void);
+
  /**
    * @desc    LCD Init PORTs
    *
@@ -164,7 +173,7 @@
    *
    * @return  void
    */
-  void ILI9341_InitPortsWithRES (void);
+  void ILI9341_InitPorts (void);
 
   /**
    * @desc    LCD Transmit Command
