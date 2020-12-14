@@ -105,8 +105,20 @@
   #define ILI9341_RDID2         0xDB  // Read ID2
   #define ILI9341_RDID3         0xDC  // Read ID3
   // ---------------------------------------------------------------
-  #define ILI9341_POGCR         0xE0  // Positive Gamma Correction
-  #define ILI9341_NEGCO         0xE1  // Neagtove Gamma Correction
+  #define ILI9341_GMCTRP1       0xE0  // Positive Gamma Correction
+  #define ILI9341_GMCTRN1       0xE1  // Neagtove Gamma Correction
+
+  // Extend register commands
+  // --------------------------------------------------------------- 
+  // @source https://github.com/fagcinsk/stm-ILI9341-spi/blob/master/lib/ILI9341/commands.h
+  #define ILI9341_LCD_POWERA    0xCB   // Power control A register
+  #define ILI9341_LCD_POWERB    0xCF   // Power control B register
+  #define ILI9341_LCD_DTCA      0xE8   // Driver timing control A
+  #define ILI9341_LCD_DTCB      0xEA   // Driver timing control B
+  #define ILI9341_LCD_POWER_SEQ 0xED   // Power on sequence register
+  #define ILI9341_LCD_3GAMMA_EN 0xF2   // 3 Gamma enable register
+  #define ILI9341_LCD_PRC       0xF7   // Pump ratio control register
+
 
   // SOFTWARE DEFINITION
   // ---------------------------------------------------------------
