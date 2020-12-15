@@ -145,7 +145,7 @@
   // rows max counter
   #define ILI9341_SIZE_Y        ILI9341_MAX_Y - 1
   // whole pixels
-  #define ILI9341_CACHE_MEM     (ILI9341_MAX_X * ILI9341_MAX_Y)
+  #define ILI9341_CACHE_MEM     65000
 
   /** @const Command list ILI9341B */
   extern const uint8_t INIT_ILI9341[];
@@ -207,11 +207,71 @@
   /**
    * @desc    LCD Transmit Command
    *
-   * @param   
+   * @param   uint16_t
+   * @param   uint16_t
+   * @param   uint16_t
+   * @param   uint16_t 
    *
    * @return  void
    */
   void ILI9341_SetWindow (uint16_t, uint16_t, uint16_t, uint16_t);
+
+  /**
+   * @desc    LCD Write color pixels
+   *
+   * @param   uint16_t
+   * @param   uint32_t
+   *
+   * @return  void
+   */
+  void ILI9341_SendColor565 (uint16_t, uint32_t);
+
+  /**
+   * @desc    LCD Draw Pixel
+   *
+   * @param   uint16_t
+   * @param   uint16_t
+   * @param   uint16_t
+   *
+   * @return  void
+   */
+  void ILI9341_DrawPixel (uint16_t, uint16_t, uint16_t);
+
+  /**
+   * @desc    LCD Clear screen
+   *
+   * @param   uint16_t
+   *
+   * @return  void
+   */
+  void ILI9341_ClearScreen (uint16_t);
+
+  /**
+   * @desc    LCD Inverse Screen
+   *
+   * @param   void
+   *
+   * @return  void
+   */
+  void ILI9341_InverseScreen (void);
+
+  /**
+   * @desc    LCD Normal Screen
+   *
+   * @param   void
+   *
+   * @return  void
+   */
+  void ILI9341_NormalScreen (void);
+
+  /**
+   * @desc    LCD Update Screen
+   *
+   * @param   void
+   *
+   * @return  void
+   */
+  void ILI9341_UpdateScreen (void);
 
   /**
    * @desc    Delay
@@ -220,6 +280,6 @@
    *
    * @return  void
    */
-  void ILI9341_Delay(unsigned short int);
+  void ILI9341_Delay (unsigned short int);
 
 #endif

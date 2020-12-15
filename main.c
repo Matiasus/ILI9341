@@ -14,6 +14,7 @@
  * --------------------------------------------------------------------------------------------+
  * @inspir      
  */
+#include <util/delay.h>
 #include "lib/ili9341.h"
 
 /**
@@ -27,7 +28,13 @@ int main(void)
 {
   // init lcd
   ILI9341_Init();
-  
+
+  // inverse
+  ILI9341_DrawPixel(10, 10, 0x0000);
+
+  // Update screen
+  ILI9341_UpdateScreen();
+
   // EXIT
   // ------------------------------------------------- 
   // return & exit

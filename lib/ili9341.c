@@ -21,13 +21,12 @@
 #include <util/delay.h>
 #include <stdio.h>
 #include "font.h"
-#include "ssd1306.h"
 #include "ili9341.h"
 
 /** @array Init command */
 const uint8_t INIT_ILI9341[] PROGMEM = {
   // number of initializers
-  12,
+  11,
 
   // --------------------------------------------  
   0,  50, ILI9341_SWRESET,                                      // 0x01 -> Software reset
@@ -49,7 +48,7 @@ const uint8_t INIT_ILI9341[] PROGMEM = {
   1,   0, ILI9341_VCCR2, 0xC0,                                  // 0xC7 -> VCOM Control 2
 
   // -------------------------------------------- 
-  1,   0, ILI9341_MADCTL, 0x00,                                 // 0x36 -> Memory Access Control
+  1,   0, ILI9341_MADCTL, 0x40,                                 // 0x36 -> Memory Access Control
   1,   0, ILI9341_COLMOD, 0x55,                                 // 0x3A -> Pixel Format Set
   2,   0, ILI9341_FRMCRN1, 0x00, 0x1B,                          // 0xB1 -> Frame Rate Control
 /*
@@ -68,7 +67,7 @@ const uint8_t INIT_ILI9341[] PROGMEM = {
 */
   // --------------------------------------------
   0, 150, ILI9341_SLPOUT,                                       // 0x11 -> Sleep Out
-  0, 200, ILI9341_DISPON                                        // 0x29 -> Display on
+//  0, 200, ILI9341_DISPON                                        // 0x29 -> Display on
 };
 
 /** @var array Chache memory char index row */
@@ -145,6 +144,96 @@ void ILI9341_SetWindow (uint16_t xs, uint16_t ys, uint16_t xe, uint16_t ye)
   ILI9341_TransmitCmmd(ILI9341_PASET);
   ILI9341_Transmit16bitData(ys);
   ILI9341_Transmit16bitData(ye);
+}
+
+/**
+ * @desc    LCD Write color pixels
+ *
+ * @param   uint16_t
+ * @param   uint16_t
+ *
+ * @return  void
+ */
+void ILI9341_SendColor565 (uint16_t color, uint32_t count)
+{
+  // access to RAM
+  ILI9341_TransmitCmmd(ILI9341_RAMWR);
+  // counter
+  while (count--) {
+    // write color
+    ILI9341_Transmit16bitData(color);
+  }
+}
+
+/**
+ * @desc    LCD Draw Pixel
+ *
+ * @param   uint16_t
+ * @param   uint16_t
+ * @param   uint16_t
+ *
+ * @return  void
+ */
+void ILI9341_DrawPixel (uint16_t x, uint16_t y, uint16_t color)
+{
+  // set window
+  ILI9341_SetWindow(x, x+1, y, y+1);
+  // draw pixel by 565 mode
+  ILI9341_SendColor565(color, 1);
+}
+
+/**
+ * @desc    Clear screen
+ *
+ * @param   uint16_t color
+ *
+ * @return  void
+ */
+void ILI9341_ClearScreen (uint16_t color)
+{
+  // set whole window
+  ILI9341_SetWindow(0, ILI9341_MAX_X - 1, 0, ILI9341_MAX_Y - 1);
+  // draw individual pixels
+  ILI9341_SendColor565(color, ILI9341_CACHE_MEM);
+}
+
+/**
+ * @desc    LCD Inverse Screen
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void ILI9341_InverseScreen (void)
+{
+  // display on
+  ILI9341_TransmitCmmd(ILI9341_DINVON);
+}
+
+/**
+ * @desc    LCD Normal Screen
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void ILI9341_NormalScreen (void)
+{
+  // display on
+  ILI9341_TransmitCmmd(ILI9341_DINVOFF);
+}
+
+/**
+ * @desc    LCD Update Screen
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void ILI9341_UpdateScreen (void)
+{
+  // display on
+  ILI9341_TransmitCmmd(ILI9341_DISPON);
 }
 
 /**
