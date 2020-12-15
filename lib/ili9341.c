@@ -25,13 +25,13 @@
 #include "ili9341.h"
 
 /** @array Init command */
-const uint16_t INIT_ILI9341[] PROGMEM = {
+const uint8_t INIT_ILI9341[] PROGMEM = {
   // number of initializers
   12,
 
   // --------------------------------------------  
   0,  50, ILI9341_SWRESET,                                      // 0x01 -> Software reset
-  0,  10, ILI9341_DISPOFF,                                      // 0x28 -> Display OFF
+  0,   0, ILI9341_DISPOFF,                                      // 0x28 -> Display OFF
 /*
   // --------------------------------------------
   3,   0, 0xEF, 0x03, 0x80, 0x02,                               // 0xEF
@@ -43,21 +43,21 @@ const uint16_t INIT_ILI9341[] PROGMEM = {
   2,   0, ILI9341_LCD_DTCB, 0x00, 0x00,                         // 0xEA -> Driver timing control B
 */
   // --------------------------------------------  
-  1,  10, ILI9341_PWCTRL1, 0x23,                                // 0xC0 -> Power Control 1
-  1,  10, ILI9341_PWCTRL2, 0x10,                                // 0xC1 -> Power Control 2
-  2,  10, ILI9341_VCCR1, 0x2B, 0x2B,                            // 0xC5 -> VCOM Control 1
-  1,  10, ILI9341_VCCR2, 0xC0,                                  // 0xC7 -> VCOM Control 2
+  1,   0, ILI9341_PWCTRL1, 0x23,                                // 0xC0 -> Power Control 1
+  1,   0, ILI9341_PWCTRL2, 0x10,                                // 0xC1 -> Power Control 2
+  2,   0, ILI9341_VCCR1, 0x2B, 0x2B,                            // 0xC5 -> VCOM Control 1
+  1,   0, ILI9341_VCCR2, 0xC0,                                  // 0xC7 -> VCOM Control 2
 
   // -------------------------------------------- 
-  1,  10, ILI9341_MADCTL, 0x48,                                 // 0x36 -> Memory Access Control
-  1,  10, ILI9341_COLMOD, 0x55,                                 // 0x3A -> Pixel Format Set
-  2,  10, ILI9341_FRMCRN1, 0x00, 0x1B,                          // 0xB1 -> Frame Rate Control
+  1,   0, ILI9341_MADCTL, 0x00,                                 // 0x36 -> Memory Access Control
+  1,   0, ILI9341_COLMOD, 0x55,                                 // 0x3A -> Pixel Format Set
+  2,   0, ILI9341_FRMCRN1, 0x00, 0x1B,                          // 0xB1 -> Frame Rate Control
 /*
   3,   0, ILI9341_DISCTRL, 0x08, 0x82, 0x27,                    // 0xB6 -> Display Function Control
   1,   0, 0xF2, 0x00,                                           // 0xF2 -> gamma function disable
   2,   0, ILI9341_GAMSET, 0x00, 0x1B,                           // 0x26 -> Gamma Set
 */
-  1,  10, ILI9341_ETMOD, 0x07,                                  // 0xB7 -> Entry Mode Set
+  1,   0, ILI9341_ETMOD, 0x07,                                  // 0xB7 -> Entry Mode Set
 /*  
   // Set Gamma - positive
   15,  0, ILI9341_GMCTRP1 , 0x0F, 0x31, 0x2B, 0x0C, 0x0E, 0x08, 
@@ -68,7 +68,7 @@ const uint16_t INIT_ILI9341[] PROGMEM = {
 */
   // --------------------------------------------
   0, 150, ILI9341_SLPOUT,                                       // 0x11 -> Sleep Out
-  0, 500, ILI9341_DISPON                                        // 0x29 -> Display on
+  0, 200, ILI9341_DISPON                                        // 0x29 -> Display on
 };
 
 /** @var array Chache memory char index row */
@@ -85,15 +85,8 @@ unsigned short int cacheMemIndexCol = 0;
  */
 void ILI9341_Init (void)
 {
-/*
-  char *txt = "ERRORISIS";
-  // Init ssd1306 oled
-  SSD1306_Init();
-  // clear screen
-  SSD1306_ClearScreen();
-*/  
   // variables
-  const uint16_t *commands = INIT_ILI9341;
+  const uint8_t *commands = INIT_ILI9341;
   // number of commands
   unsigned short int no_of_commands = pgm_read_byte(commands++);
   // arguments
@@ -118,11 +111,7 @@ void ILI9341_Init (void)
     delay = pgm_read_byte(commands++);
     // command
     command = pgm_read_byte(commands++);
-/*
-    // string
-    sprintf(txt, "%x-[", command);
-    SSD1306_DrawString(txt);
-*/
+
     // send command
     // -------------------------    
     ILI9341_TransmitCmmd(command);
@@ -130,20 +119,32 @@ void ILI9341_Init (void)
     // send arguments
     // -------------------------
     while (no_of_arguments--) {
-/*
-      // string
-      sprintf(txt, "%x ", pgm_read_byte(commands));
-      SSD1306_DrawString(txt);
-*/
       // send arguments
-      ILI9341_TransmitData(pgm_read_byte(commands++));
+      ILI9341_Transmit8bitData(pgm_read_byte(commands++));
     }
-
-    SSD1306_DrawString("] ");
-
     // delay
     ILI9341_Delay(delay);
   }
+  // set window -> after this function display show RAM content
+  ILI9341_SetWindow(0, 0, ILI9341_MAX_X-1, ILI9341_MAX_Y-1);
+}
+
+/**
+ * @desc    LCD Transmit Command
+ *
+ * @param   
+ *
+ * @return  void
+ */
+void ILI9341_SetWindow (uint16_t xs, uint16_t ys, uint16_t xe, uint16_t ye)
+{
+  ILI9341_TransmitCmmd(ILI9341_CASET);
+  ILI9341_Transmit16bitData(xs);
+  ILI9341_Transmit16bitData(xe);
+
+  ILI9341_TransmitCmmd(ILI9341_PASET);
+  ILI9341_Transmit16bitData(ys);
+  ILI9341_Transmit16bitData(ye);
 }
 
 /**
@@ -181,11 +182,11 @@ void ILI9341_TransmitCmmd (char cmmd)
 /**
  * @desc    LCD transmit
  *
- * @param   char
+ * @param   uint8_t
  *
  * @return  void
  */
-void ILI9341_TransmitData (char data)
+void ILI9341_Transmit8bitData (uint8_t data)
 {
   // D/C -> HIGH
   SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RS);
@@ -201,6 +202,41 @@ void ILI9341_TransmitData (char data)
 
   // set data on PORT
   ILI9341_PORT_DATA = data;
+  // WR -> LOW
+  WR_IMPULSE();
+
+  // disable chip select -> HIGH
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS);
+}
+
+/**
+ * @desc    LCD transmit
+ *
+ * @param   uint16_t
+ *
+ * @return  void
+ */
+void ILI9341_Transmit16bitData (uint16_t data)
+{
+  // D/C -> HIGH
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RS);
+  // enable chip select -> LOW
+  CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS);
+
+  // Write data timing diagram
+  // --------------------------------------------
+  //              ___
+  // D0 - D7:  __/   \__
+  //          __    __
+  //      WR:   \__/
+
+  // set higher 8 bit data on PORT
+  ILI9341_PORT_DATA = (uint8_t) data >> 8;
+  // WR -> LOW
+  WR_IMPULSE();
+
+  // set lower 8 bit data on PORT
+  ILI9341_PORT_DATA = (uint8_t) data;
   // WR -> LOW
   WR_IMPULSE();
 

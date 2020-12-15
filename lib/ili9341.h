@@ -148,7 +148,7 @@
   #define ILI9341_CACHE_MEM     (ILI9341_MAX_X * ILI9341_MAX_Y)
 
   /** @const Command list ILI9341B */
-  extern const uint16_t INIT_ILI9341[];
+  extern const uint8_t INIT_ILI9341[];
 
   /**
    * @desc    LCD Init
@@ -180,20 +180,38 @@
   /**
    * @desc    LCD Transmit Command
    *
-   * @param   char
+   * @param   uint8_t
    *
    * @return  void
    */
   void ILI9341_TransmitCmmd (char);
 
   /**
-   * @desc    LCD Transmit Data
+   * @desc    LCD Transmit 8 bit Data
    *
-   * @param   char
+   * @param   uint8_t
    *
    * @return  void
    */
-  void ILI9341_TransmitData (char);
+  void ILI9341_Transmit8bitData (uint8_t);
+
+  /**
+   * @desc    LCD transmit
+   *
+   * @param   uint16_t
+   *
+   * @return  void
+   */
+  void ILI9341_Transmit16bitData (uint16_t);
+
+  /**
+   * @desc    LCD Transmit Command
+   *
+   * @param   
+   *
+   * @return  void
+   */
+  void ILI9341_SetWindow (uint16_t, uint16_t, uint16_t, uint16_t);
 
   /**
    * @desc    Delay
