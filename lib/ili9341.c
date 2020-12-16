@@ -177,7 +177,7 @@ void ILI9341_SendColor565 (uint16_t color, uint32_t count)
 void ILI9341_DrawPixel (uint16_t x, uint16_t y, uint16_t color)
 {
   // set window
-  ILI9341_SetWindow(x, x+1, y, y+1);
+  ILI9341_SetWindow(x, y, x, y);
   // draw pixel by 565 mode
   ILI9341_SendColor565(color, 1);
 }

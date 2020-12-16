@@ -29,8 +29,21 @@ int main(void)
   // init lcd
   ILI9341_Init();
 
-  // inverse
-  ILI9341_DrawPixel(10, 10, 0x0000);
+  for (int i=20; i<50; i++) {
+    // 
+    ILI9341_DrawPixel(10, i, 0xffff);
+  }
+
+  for (int i=20; i<50; i++) {
+    // 
+    ILI9341_DrawPixel(i, 20, 0x0000);
+  }
+
+  for (int i=20; i<50; i++) {
+    // 
+    ILI9341_DrawPixel(i, i, 0x0ff0);
+  }
+
 
   // Update screen
   ILI9341_UpdateScreen();
