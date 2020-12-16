@@ -26,7 +26,7 @@
 /** @array Init command */
 const uint8_t INIT_ILI9341[] PROGMEM = {
   // number of initializers
-  11,
+  12,
 
   // --------------------------------------------  
   0,  50, ILI9341_SWRESET,                                      // 0x01 -> Software reset
@@ -67,7 +67,7 @@ const uint8_t INIT_ILI9341[] PROGMEM = {
 */
   // --------------------------------------------
   0, 150, ILI9341_SLPOUT,                                       // 0x11 -> Sleep Out
-//  0, 200, ILI9341_DISPON                                        // 0x29 -> Display on
+  0, 200, ILI9341_DISPON                                        // 0x29 -> Display on
 };
 
 /** @var array Chache memory char index row */
@@ -129,117 +129,72 @@ void ILI9341_Init (void)
 }
 
 /**
- * @desc    LCD Set address window
- *
- * @param   uint16_t
- * @param   uint16_t
- * @param   uint16_t
- * @param   uint16_t
- *
- * @return  void
- */
-void ILI9341_SetWindow (uint16_t xs, uint16_t ys, uint16_t xe, uint16_t ye)
-{
-  // set column
-  ILI9341_TransmitCmmd(ILI9341_CASET);
-  // set column -> set column
-  ILI9341_Transmit32bitData(((uint32_t) xs << 16) | xe);
-  // set page
-  ILI9341_TransmitCmmd(ILI9341_PASET);
-  // set page -> high byte first
-  ILI9341_Transmit32bitData(((uint32_t) ys << 16) | ye);
-}
-
-/**
- * @desc    LCD Draw Pixel
- *
- * @param   uint16_t
- * @param   uint16_t
- * @param   uint16_t
- *
- * @return  void
- */
-void ILI9341_DrawPixel (uint16_t x, uint16_t y, uint16_t color)
-{
-  // set window
-  ILI9341_SetWindow(x, y, x, y);
-  // draw pixel by 565 mode
-  ILI9341_SendColor565(color, 1);
-}
-
-/**
- * @desc    LCD Write Color Pixels
- *
- * @param   uint16_t
- * @param   uint32_t
- *
- * @return  void
- */
-void ILI9341_SendColor565 (uint16_t color, uint32_t count)
-{
-  // access to RAM
-  ILI9341_TransmitCmmd(ILI9341_RAMWR);
-  // counter
-  while (count--) {
-    // write color - first colors byte
-    ILI9341_Transmit8bitData((uint8_t) (color >> 8));
-    // write color - second color byte
-    ILI9341_Transmit8bitData((uint8_t) color);
-  }
-}
-
-/**
- * @desc    Clear screen
- *
- * @param   uint16_t color
- *
- * @return  void
- */
-void ILI9341_ClearScreen (uint16_t color)
-{
-  // set whole window
-  ILI9341_SetWindow(0, 0, ILI9341_SIZE_X, ILI9341_SIZE_Y);
-  // draw individual pixels
-  ILI9341_SendColor565(color, ILI9341_CACHE_MEM);
-}
-
-/**
- * @desc    LCD Inverse Screen
+ * @desc    LCD init PORTs
  *
  * @param   void
  *
  * @return  void
  */
-void ILI9341_InverseScreen (void)
+void ILI9341_InitPorts (void)
 {
-  // display on
-  ILI9341_TransmitCmmd(ILI9341_DINVON);
+  // set control pins as output
+  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_CS);
+  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_RS);
+  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_RD);
+  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_WR);
+
+  // set HIGH Level on all pins - IDLE MODE
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS); 
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RS); 
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RD); 
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_WR);
+
+  // set all pins as output
+  ILI9341_DDR_DATA = 0xFF;
 }
 
 /**
- * @desc    LCD Normal Screen
+ * @desc    LCD Hardware Reset
  *
  * @param   void
  *
  * @return  void
  */
-void ILI9341_NormalScreen (void)
+void ILI9341_HWReset (void)
 {
-  // display on
-  ILI9341_TransmitCmmd(ILI9341_DINVOFF);
-}
+  // set RESET as Output
+  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_RST);
 
-/**
- * @desc    LCD Update Screen
- *
- * @param   void
- *
- * @return  void
- */
-void ILI9341_UpdateScreen (void)
-{
-  // display on
-  ILI9341_TransmitCmmd(ILI9341_DISPON);
+  // RESET SEQUENCE
+  // --------------------------------------------
+  // set Reset LOW
+  CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RST);
+  // delay LOW > 10us
+  _delay_ms(10);
+  // set Reset HIGH
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RST);
+/*
+  // Adafruit 
+  // --------------------------------------------
+  // CS Active
+  CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS);
+  // Command Active
+  CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RS);  
+
+  // set command on PORT
+  ILI9341_PORT_DATA = 0x00;
+  // WR strobe
+  WR_IMPULSE();
+  // WR strobe
+  WR_IMPULSE();
+  // WR strobe
+  WR_IMPULSE();
+
+  // Idle Mode
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS);
+*/
+  // delay HIGH > 120ms
+  _delay_ms(200);  
 }
 
 /**
@@ -385,77 +340,224 @@ void ILI9341_Transmit32bitData (uint32_t data)
 }
 
 /**
- * @desc    LCD Hardware Reset
+ * @desc    LCD Set address window
  *
- * @param   void
+ * @param   uint16_t
+ * @param   uint16_t
+ * @param   uint16_t
+ * @param   uint16_t
  *
- * @return  void
+ * @return  char
  */
-void ILI9341_HWReset (void)
+char ILI9341_SetWindow (uint16_t xs, uint16_t ys, uint16_t xe, uint16_t ye)
 {
-  // set RESET as Output
-  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_RST);
+  // check if coordinates is out of range
+  if ((xs > xe) || (xe > ILI9341_SIZE_X) ||
+      (ys > ye) || (ye > ILI9341_SIZE_Y)) 
+  { 
+    // out of range
+    return ILI9341_ERROR;
+  }  
 
-  // Idle Mode
-  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS); 
-  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RD); 
-  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_WR);
-
-  // RESET SEQUENCE
-  // --------------------------------------------
-  // set Reset LOW
-  CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RST);
-  // delay > 10us
-  _delay_ms(10);
-  // set Reset HIGH
-  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RST);
-
-  // CS Active
-  CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS);
-  // Command Active
-  CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RS);  
-
-  // set command on PORT
-  ILI9341_PORT_DATA = 0x00;
-  // WR strobe
-  WR_IMPULSE();
-  // WR strobe
-  WR_IMPULSE();
-  // WR strobe
-  WR_IMPULSE();
-
-  // Idle Mode
-  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS);
-
-  // delay > 10us
-  _delay_ms(200);  
+  // set column
+  ILI9341_TransmitCmmd(ILI9341_CASET);
+  // set column -> set column
+  ILI9341_Transmit32bitData(((uint32_t) xs << 16) | xe);
+  // set page
+  ILI9341_TransmitCmmd(ILI9341_PASET);
+  // set page -> high byte first
+  ILI9341_Transmit32bitData(((uint32_t) ys << 16) | ye);
+  // success
+  return ILI9341_SUCCESS;
 }
 
 /**
- * @desc    LCD init PORTs
+ * @desc    LCD Draw Pixel
+ *
+ * @param   uint16_t
+ * @param   uint16_t
+ * @param   uint16_t
+ *
+ * @return  char
+ */
+char ILI9341_DrawPixel (uint16_t x, uint16_t y, uint16_t color)
+{
+  // check dimension
+  if ((x > ILI9341_SIZE_X) || (y > ILI9341_SIZE_Y)) {
+    // error
+    return ILI9341_ERROR;
+  }
+  // set window
+  ILI9341_SetWindow(x, y, x, y);
+  // draw pixel by 565 mode
+  ILI9341_SendColor565(color, 1);
+  // success
+  return ILI9341_SUCCESS;
+}
+
+/**
+ * @desc    LCD Write Color Pixels
+ *
+ * @param   uint16_t
+ * @param   uint32_t
+ *
+ * @return  void
+ */
+void ILI9341_SendColor565 (uint16_t color, uint32_t count)
+{
+  // access to RAM
+  ILI9341_TransmitCmmd(ILI9341_RAMWR);
+  // counter
+  while (count--) {
+    // write color - first colors byte
+    ILI9341_Transmit8bitData((uint8_t) (color >> 8));
+    // write color - second color byte
+    ILI9341_Transmit8bitData((uint8_t) color);
+  }
+}
+
+/**
+ * @desc    Clear screen
+ *
+ * @param   uint16_t color
+ *
+ * @return  void
+ */
+void ILI9341_ClearScreen (uint16_t color)
+{
+  // set whole window
+  ILI9341_SetWindow(0, 0, ILI9341_SIZE_X, ILI9341_SIZE_Y);
+  // draw individual pixels
+  ILI9341_SendColor565(color, ILI9341_CACHE_MEM);
+}
+
+/**
+ * @desc    LCD Inverse Screen
  *
  * @param   void
  *
  * @return  void
  */
-void ILI9341_InitPorts (void)
+void ILI9341_InverseScreen (void)
 {
-  // set control pins as output
-  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_CS);
-  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_RS);
-  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_RD);
-  SETBIT(ILI9341_DDR_CONTROL, ILI9341_PIN_WR);
-
-  // set HIGH Level on all pins - IDLE MODE
-  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS); 
-  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RS); 
-  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RD); 
-  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_WR);
-
-  // set all pins as output
-  ILI9341_DDR_DATA = 0xFF;
+  // display on
+  ILI9341_TransmitCmmd(ILI9341_DINVON);
 }
 
+/**
+ * @desc    LCD Normal Screen
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void ILI9341_NormalScreen (void)
+{
+  // display on
+  ILI9341_TransmitCmmd(ILI9341_DINVOFF);
+}
+
+/**
+ * @desc    LCD Update Screen
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void ILI9341_UpdateScreen (void)
+{
+  // display on
+  ILI9341_TransmitCmmd(ILI9341_DISPON);
+}
+
+/**
+ * @desc    Draw line by Bresenham algoritm
+ * @surce   https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+ *  
+ * @param   uint8_t   x start position / 0 <= cols <= ILI9341_SIZE_X
+ * @param   uint8_t   x end position   / 0 <= cols <= ILI9341_SIZE_X
+ * @param   uint8_t   y start position / 0 <= rows <= ILI9341_SIZE_Y 
+ * @param   uint8_t   y end position   / 0 <= rows <= ILI9341_SIZE_Y
+ * @param   uint16_t  color
+ *
+ * @return  void
+ */
+void ILI9341_DrawLine(uint16_t x1, uint16_t x2, uint16_t y1, uint16_t y2, uint16_t color)
+{
+  // determinant
+  int16_t D;
+  // deltas
+  int16_t delta_x, delta_y;
+  // steps
+  int16_t trace_x = 1, trace_y = 1;
+
+  // delta x
+  delta_x = x2 - x1;
+  // delta y
+  delta_y = y2 - y1;
+
+  // check if x2 > x1
+  if (delta_x < 0) {
+    // negate delta x
+    delta_x = -delta_x;
+    // negate step x
+    trace_x = -trace_x;
+  }
+
+  // check if y2 > y1
+  if (delta_y < 0) {
+    // negate detla y
+    delta_y = -delta_y;
+    // negate step y
+    trace_y = -trace_y;
+  }
+
+  // Bresenham condition for m < 1 (dy < dx)
+  if (delta_y < delta_x) {
+    // calculate determinant
+    D = (delta_y << 1) - delta_x;
+    // draw first pixel
+    ILI9341_DrawPixel(x1, y1, color);
+    // check if x1 equal x2
+    while (x1 != x2) {
+      // update x1
+      x1 += trace_x;
+      // check if determinant is positive
+      if (D >= 0) {
+        // update y1
+        y1 += trace_y;
+        // update determinant
+        D -= 2*delta_x;    
+      }
+      // update deteminant
+      D += 2*delta_y;
+      // draw next pixel
+      ILI9341_DrawPixel(x1, y1, color);
+    }
+  // for m > 1 (dy > dx)    
+  } else {
+    // calculate determinant
+    D = delta_y - (delta_x << 1);
+    // draw first pixel
+    ILI9341_DrawPixel(x1, y1, color);
+    // check if y2 equal y1
+    while (y1 != y2) {
+      // update y1
+      y1 += trace_y;
+      // check if determinant is positive
+      if (D <= 0) {
+        // update y1
+        x1 += trace_x;
+        // update determinant
+        D += 2*delta_y;    
+      }
+      // update deteminant
+      D -= 2*delta_x;
+      // draw next pixel
+      ILI9341_DrawPixel(x1, y1, color);
+    }
+  }
+}
 
 /**
  * @desc    Delay

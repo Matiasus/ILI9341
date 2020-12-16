@@ -221,9 +221,9 @@
    * @param   uint16_t
    * @param   uint16_t 
    *
-   * @return  void
+   * @return  char
    */
-  void ILI9341_SetWindow (uint16_t, uint16_t, uint16_t, uint16_t);
+  char ILI9341_SetWindow (uint16_t, uint16_t, uint16_t, uint16_t);
 
   /**
    * @desc    LCD Write Color Pixels
@@ -242,9 +242,9 @@
    * @param   uint16_t
    * @param   uint16_t
    *
-   * @return  void
+   * @return  char
    */
-  void ILI9341_DrawPixel (uint16_t, uint16_t, uint16_t);
+  char ILI9341_DrawPixel (uint16_t, uint16_t, uint16_t);
 
   /**
    * @desc    LCD Clear screen
@@ -281,6 +281,20 @@
    * @return  void
    */
   void ILI9341_UpdateScreen (void);
+
+  /**
+   * @desc    LCD Draw line by Bresenham algoritm
+   * @surce   https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+   *  
+   * @param   uint16_t   x start position / 0 <= cols <= ILI9341_SIZE_X
+   * @param   uint16_t   x end position   / 0 <= cols <= ILI9341_SIZE_X
+   * @param   uint16_t   y start position / 0 <= rows <= ILI9341_SIZE_Y 
+   * @param   uint16_t   y end position   / 0 <= rows <= ILI9341_SIZE_Y
+   * @param   uint16_t  color
+   *
+   * @return  void
+   */
+  void ILI9341_DrawLine(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
 
   /**
    * @desc    Delay
