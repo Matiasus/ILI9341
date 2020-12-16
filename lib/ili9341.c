@@ -48,7 +48,7 @@ const uint8_t INIT_ILI9341[] PROGMEM = {
   1,   0, ILI9341_VCCR2, 0xC0,                                  // 0xC7 -> VCOM Control 2
 
   // -------------------------------------------- 
-  1,   0, ILI9341_MADCTL, 0x40,                                 // 0x36 -> Memory Access Control
+  1,   0, ILI9341_MADCTL, 0x08,                                 // 0x36 -> Memory Access Control
   1,   0, ILI9341_COLMOD, 0x55,                                 // 0x3A -> Pixel Format Set
   2,   0, ILI9341_FRMCRN1, 0x00, 0x1B,                          // 0xB1 -> Frame Rate Control
 /*
@@ -129,40 +129,25 @@ void ILI9341_Init (void)
 }
 
 /**
- * @desc    LCD Transmit Command
+ * @desc    LCD Set address window
  *
- * @param   
+ * @param   uint16_t
+ * @param   uint16_t
+ * @param   uint16_t
+ * @param   uint16_t
  *
  * @return  void
  */
 void ILI9341_SetWindow (uint16_t xs, uint16_t ys, uint16_t xe, uint16_t ye)
 {
+  // set column
   ILI9341_TransmitCmmd(ILI9341_CASET);
-  ILI9341_Transmit16bitData(xs);
-  ILI9341_Transmit16bitData(xe);
-
+  // set column -> set column
+  ILI9341_Transmit32bitData(((uint32_t) xs << 16) | xe);
+  // set page
   ILI9341_TransmitCmmd(ILI9341_PASET);
-  ILI9341_Transmit16bitData(ys);
-  ILI9341_Transmit16bitData(ye);
-}
-
-/**
- * @desc    LCD Write color pixels
- *
- * @param   uint16_t
- * @param   uint16_t
- *
- * @return  void
- */
-void ILI9341_SendColor565 (uint16_t color, uint32_t count)
-{
-  // access to RAM
-  ILI9341_TransmitCmmd(ILI9341_RAMWR);
-  // counter
-  while (count--) {
-    // write color
-    ILI9341_Transmit16bitData(color);
-  }
+  // set page -> high byte first
+  ILI9341_Transmit32bitData(((uint32_t) ys << 16) | ye);
 }
 
 /**
@@ -183,6 +168,27 @@ void ILI9341_DrawPixel (uint16_t x, uint16_t y, uint16_t color)
 }
 
 /**
+ * @desc    LCD Write Color Pixels
+ *
+ * @param   uint16_t
+ * @param   uint32_t
+ *
+ * @return  void
+ */
+void ILI9341_SendColor565 (uint16_t color, uint32_t count)
+{
+  // access to RAM
+  ILI9341_TransmitCmmd(ILI9341_RAMWR);
+  // counter
+  while (count--) {
+    // write color - first colors byte
+    ILI9341_Transmit8bitData((uint8_t) (color >> 8));
+    // write color - second color byte
+    ILI9341_Transmit8bitData((uint8_t) color);
+  }
+}
+
+/**
  * @desc    Clear screen
  *
  * @param   uint16_t color
@@ -192,7 +198,7 @@ void ILI9341_DrawPixel (uint16_t x, uint16_t y, uint16_t color)
 void ILI9341_ClearScreen (uint16_t color)
 {
   // set whole window
-  ILI9341_SetWindow(0, ILI9341_MAX_X - 1, 0, ILI9341_MAX_Y - 1);
+  ILI9341_SetWindow(0, 0, ILI9341_SIZE_X, ILI9341_SIZE_Y);
   // draw individual pixels
   ILI9341_SendColor565(color, ILI9341_CACHE_MEM);
 }
@@ -269,7 +275,7 @@ void ILI9341_TransmitCmmd (char cmmd)
 }
 
 /**
- * @desc    LCD transmit
+ * @desc    LCD transmit 8 bits data
  *
  * @param   uint8_t
  *
@@ -299,7 +305,7 @@ void ILI9341_Transmit8bitData (uint8_t data)
 }
 
 /**
- * @desc    LCD transmit
+ * @desc    LCD transmit 16 bits data
  *
  * @param   uint16_t
  *
@@ -320,7 +326,7 @@ void ILI9341_Transmit16bitData (uint16_t data)
   //      WR:   \__/
 
   // set higher 8 bit data on PORT
-  ILI9341_PORT_DATA = (uint8_t) data >> 8;
+  ILI9341_PORT_DATA = (uint8_t) (data >> 8);
   // WR -> LOW
   WR_IMPULSE();
 
@@ -334,7 +340,52 @@ void ILI9341_Transmit16bitData (uint16_t data)
 }
 
 /**
- * @desc    LCD init PORTs
+ * @desc    LCD transmit 32 bits data
+ *
+ * @param   uint16_t
+ *
+ * @return  void
+ */
+void ILI9341_Transmit32bitData (uint32_t data)
+{
+  // D/C -> HIGH
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RS);
+  // enable chip select -> LOW
+  CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS);
+
+  // Write data timing diagram
+  // --------------------------------------------
+  //              ___
+  // D0 - D7:  __/   \__
+  //          __    __
+  //      WR:   \__/
+
+  // set higher 8 bit data on PORT
+  ILI9341_PORT_DATA = (uint8_t) (data >> 24);
+  // WR -> LOW
+  WR_IMPULSE();
+
+  // set higher 8 bit data on PORT
+  ILI9341_PORT_DATA = (uint8_t) (data >> 16);
+  // WR -> LOW
+  WR_IMPULSE();
+
+  // set higher 8 bit data on PORT
+  ILI9341_PORT_DATA = (uint8_t) (data >> 8);
+  // WR -> LOW
+  WR_IMPULSE();
+
+  // set lower 8 bit data on PORT
+  ILI9341_PORT_DATA = (uint8_t) data;
+  // WR -> LOW
+  WR_IMPULSE();
+
+  // disable chip select -> HIGH
+  SETBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS);
+}
+
+/**
+ * @desc    LCD Hardware Reset
  *
  * @param   void
  *

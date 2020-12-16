@@ -139,13 +139,13 @@
   // max columns
   #define ILI9341_MAX_X         240
   // max rows
-  #define ILI9341_MAX_Y         320
+  #define ILI9341_MAX_Y         320UL
   // columns max counter
   #define ILI9341_SIZE_X        ILI9341_MAX_X - 1
   // rows max counter
   #define ILI9341_SIZE_Y        ILI9341_MAX_Y - 1
   // whole pixels
-  #define ILI9341_CACHE_MEM     65000
+  #define ILI9341_CACHE_MEM     (ILI9341_MAX_X * ILI9341_MAX_Y)
 
   /** @const Command list ILI9341B */
   extern const uint8_t INIT_ILI9341[];
@@ -160,7 +160,7 @@
   void ILI9341_Init (void);
 
   /**
-   * @desc    LCD Hardware reset
+   * @desc    LCD Hardware Reset
    *
    * @param   void
    *
@@ -187,7 +187,7 @@
   void ILI9341_TransmitCmmd (char);
 
   /**
-   * @desc    LCD Transmit 8 bit Data
+   * @desc    LCD Transmit 8 bits data
    *
    * @param   uint8_t
    *
@@ -196,7 +196,7 @@
   void ILI9341_Transmit8bitData (uint8_t);
 
   /**
-   * @desc    LCD transmit
+   * @desc    LCD Transmit 16 bits data
    *
    * @param   uint16_t
    *
@@ -205,7 +205,16 @@
   void ILI9341_Transmit16bitData (uint16_t);
 
   /**
-   * @desc    LCD Transmit Command
+   * @desc    LCD Transmit 32 bits data
+   *
+   * @param   uint32_t
+   *
+   * @return  void
+   */
+  void ILI9341_Transmit32bitData (uint32_t);
+
+  /**
+   * @desc    LCD Set window
    *
    * @param   uint16_t
    * @param   uint16_t
@@ -217,7 +226,7 @@
   void ILI9341_SetWindow (uint16_t, uint16_t, uint16_t, uint16_t);
 
   /**
-   * @desc    LCD Write color pixels
+   * @desc    LCD Write Color Pixels
    *
    * @param   uint16_t
    * @param   uint32_t
