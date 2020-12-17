@@ -30,25 +30,17 @@ int main(void)
   ILI9341_Init();
 
   // clear Screen
-  ILI9341_ClearScreen(ILI9341_WHITE);
+  ILI9341_ClearScreen(ILI9341_BLACK);
 
+  // draw horizontal fast line
+  ILI9341_DrawLineHorizontal(10, ILI9341_MAX_X - 10, 12, ILI9341_WHITE);
+  // draw horizontal fast line
+  ILI9341_DrawLineHorizontal(10, ILI9341_MAX_X - 10, 50, ILI9341_WHITE);
 
-  for (int i=0; i<ILI9341_MAX_X; i++) {
-    // draw line
-    ILI9341_DrawLine(0, i, 0, ILI9341_SIZE_Y, ILI9341_RED);
-    // delay
-    _delay_ms(10);
-  }
-
-  int i = ILI9341_MAX_Y;
-
-  while (i--) {
-    // draw line
-    ILI9341_DrawLine(0, ILI9341_SIZE_X, i, ILI9341_SIZE_Y, 0xF0FC);
-    // delay
-    _delay_ms(10);
-  }
-
+  // set position
+  ILI9341_SetPosition(50, 25);  
+  // draw string
+  ILI9341_DrawString("ILI9341 LCD DRIVER", 0xcff0, X2);
 
   // EXIT
   // ------------------------------------------------- 

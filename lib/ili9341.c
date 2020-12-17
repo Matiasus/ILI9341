@@ -48,7 +48,7 @@ const uint8_t INIT_ILI9341[] PROGMEM = {
   1,   0, ILI9341_VCCR2, 0xC0,                                  // 0xC7 -> VCOM Control 2
 
   // -------------------------------------------- 
-  1,   0, ILI9341_MADCTL, 0x08,                                 // 0x36 -> Memory Access Control
+  1,   0, ILI9341_MADCTL, 0x48,                                 // 0x36 -> Memory Access Control
   1,   0, ILI9341_COLMOD, 0x55,                                 // 0x3A -> Pixel Format Set
   2,   0, ILI9341_FRMCRN1, 0x00, 0x1B,                          // 0xB1 -> Frame Rate Control
 /*
@@ -71,9 +71,9 @@ const uint8_t INIT_ILI9341[] PROGMEM = {
 };
 
 /** @var array Chache memory char index row */
-unsigned short int cacheMemIndexRow = 0;
+unsigned short int _ili9341_cache_index_row = 0;
 /** @var array Chache memory char index column */
-unsigned short int cacheMemIndexCol = 0;
+unsigned short int _ili9341_cache_index_col = 0;
 
 /**
  * @desc    LCD init
@@ -557,6 +557,280 @@ void ILI9341_DrawLine(uint16_t x1, uint16_t x2, uint16_t y1, uint16_t y2, uint16
       ILI9341_DrawPixel(x1, y1, color);
     }
   }
+}
+
+
+/**
+ * @desc    LCD Fast draw line horizontal - depend on MADCTL
+ *
+ * @param   uint16_t - xs start position
+ * @param   uint16_t - xe end position
+ * @param   uint16_t - y position
+ * @param   uint16_t - color
+ *
+ * @return  char
+ */
+char ILI9341_DrawLineHorizontal (uint16_t xs, uint16_t xe, uint16_t y, uint16_t color)
+{
+  // temp variable
+  uint16_t temp;
+  // check if out of range
+  if ((xs > ILI9341_SIZE_X) || (xe > ILI9341_SIZE_X) || (y > ILI9341_SIZE_Y)) {
+    // error
+    return ILI9341_ERROR;
+  }
+  // check if start is > as end  
+  if (xs > xe) {
+    // temporary safe
+    temp = xs;
+    // start change for end
+    xe = xs;
+    // end change for start
+    xs = temp;
+  }
+  // set window
+  ILI9341_SetWindow(xs, y, xe, y);
+  // draw pixel by 565 mode
+  ILI9341_SendColor565(color, xe - xs);
+  // success
+  return ILI9341_SUCCESS;
+}
+
+/**
+ * @desc    LCD Fast draw line vertical - depend on MADCTL
+ *
+ * @param   uint16_t - x position
+ * @param   uint16_t - ys start position
+ * @param   uint16_t - ye end position
+ * @param   uint16_t - color
+ *
+ * @return  char
+ */
+char ILI9341_DrawLineVertical (uint16_t x, uint16_t ys, uint16_t ye, uint16_t color)
+{
+  // temp variable
+  uint16_t temp;
+  // check if out of range
+  if ((ys > ILI9341_SIZE_Y) || (ye > ILI9341_SIZE_Y) || (x > ILI9341_SIZE_X)) {
+    // error
+    return ILI9341_ERROR;
+  }  
+  // check if start is > as end
+  if (ys > ye) {
+    // temporary safe
+    temp = ys;
+    // start change for end
+    ye = ys;
+    // end change for start
+    ys = temp;
+  }
+  // set window
+  ILI9341_SetWindow(x, ys, x, ye);
+  // draw pixel by 565 mode
+  ILI9341_SendColor565(color, ye - ys);
+  // success
+  return ILI9341_SUCCESS;
+}
+
+/**
+ * @desc    Draw character 2x larger
+ *
+ * @param   char -> character
+ * @param   uint16_t -> color
+ * @param   ILI9341_Sizes -> size
+ *
+ * @return  void
+ */
+char ILI9341_DrawChar (char character, uint16_t color, ILI9341_Sizes size)
+{
+  // variables
+  uint8_t letter, idxCol, idxRow;
+  // check if character is out of range
+  if ((character < 0x20) &&
+      (character > 0x7f)) { 
+    // out of range
+    return 0;
+  }
+  // last column of character array - 5 columns 
+  idxCol = CHARS_COLS_LENGTH;
+  // last row of character array - 8 rows / bits
+  idxRow = CHARS_ROWS_LENGTH;
+
+  // --------------------------------------
+  // SIZE X1 - normal font 1x high, 1x wide
+  // --------------------------------------
+  if (size == X1) {  
+    // loop through 5 bits
+    while (idxCol--) {
+      // read from ROM memory 
+      letter = pgm_read_byte(&FONTS[character - 32][idxCol]);
+      // loop through 8 bits
+      while (idxRow--) {
+        // check if bit set
+        if (letter & (1 << idxRow)) {
+          // draw pixel 
+          ILI9341_DrawPixel(_ili9341_cache_index_col + idxCol, _ili9341_cache_index_row + idxRow, color);
+        }
+      }
+      // fill index row again
+      idxRow = CHARS_ROWS_LENGTH;
+    }
+    // update x position
+    _ili9341_cache_index_col = _ili9341_cache_index_col + CHARS_ROWS_LENGTH;
+  
+  // --------------------------------------
+  // SIZE X2 - font 2x higher, normal wide
+  // --------------------------------------
+  } else if (size == X2) {
+    // loop through 5 bytes
+    while (idxCol--) {
+      // read from ROM memory 
+      letter = pgm_read_byte(&FONTS[character - 32][idxCol]);
+      // loop through 8 bits
+      while (idxRow--) {
+        // check if bit set
+        if (letter & (1 << idxRow)) {
+          // draw first left up pixel; 
+          // (idxRow << 1) - 2x multiplied 
+          ILI9341_DrawPixel(_ili9341_cache_index_col + idxCol, _ili9341_cache_index_row + (idxRow << 1), color);
+          // draw second left down pixel
+          ILI9341_DrawPixel(_ili9341_cache_index_col + idxCol, _ili9341_cache_index_row + (idxRow << 1) + 1, color);
+        }
+      }
+      // fill index row again
+      idxRow = CHARS_ROWS_LENGTH;
+    }
+    // update x position
+    _ili9341_cache_index_col = _ili9341_cache_index_col + CHARS_ROWS_LENGTH;
+
+  // --------------------------------------
+  // SIZE X3 - font 2x higher, 2x wider
+  // --------------------------------------
+  } else if (size == X3) {
+    // loop through 5 bytes
+    while (idxCol--) {
+      // read from ROM memory 
+      letter = pgm_read_byte(&FONTS[character - 32][idxCol]);
+      // loop through 8 bits
+      while (idxRow--) {
+        // check if bit set
+        if (letter & (1 << idxRow)) {
+          // draw first left up pixel; 
+          // (idxRow << 1) - 2x multiplied 
+          ILI9341_DrawPixel(_ili9341_cache_index_col + (idxCol << 1), _ili9341_cache_index_row + (idxRow << 1), color);
+          // draw second left down pixel
+          ILI9341_DrawPixel(_ili9341_cache_index_col + (idxCol << 1), _ili9341_cache_index_row + (idxRow << 1) + 1, color);
+          // draw third right up pixel
+          ILI9341_DrawPixel(_ili9341_cache_index_col + (idxCol << 1) + 1, _ili9341_cache_index_row + (idxRow << 1), color);
+          // draw fourth right down pixel
+          ILI9341_DrawPixel(_ili9341_cache_index_col + (idxCol << 1) + 1, _ili9341_cache_index_row + (idxRow << 1) + 1, color);
+        }
+      }
+      // fill index row again
+      idxRow = CHARS_ROWS_LENGTH;
+    }
+    // update x position
+    _ili9341_cache_index_col = _ili9341_cache_index_col + CHARS_ROWS_LENGTH + CHARS_ROWS_LENGTH;
+  }
+  // return exit
+  return ILI9341_SUCCESS;
+}
+
+/**
+ * @desc    Draw string
+ *
+ * @param   char* -> string 
+ * @param   uint16_t -> color
+ * @param   ILI9341_Sizes
+ *
+ * @return  void
+ */
+void ILI9341_DrawString (char *str, uint16_t color, ILI9341_Sizes size)
+{
+  // variables
+  unsigned int i = 0;
+  unsigned char check;
+  unsigned char delta_y;
+  unsigned char max_y_pos;
+  unsigned char new_x_pos;
+  unsigned char new_y_pos;
+
+  // loop through character of string
+  while (str[i] != '\0') {
+    // max x position character
+    new_x_pos = _ili9341_cache_index_col + CHARS_COLS_LENGTH + (size & 0x0F);
+    // delta y
+    delta_y = CHARS_ROWS_LENGTH + (size >> 4);
+    // max y position character
+    new_y_pos = _ili9341_cache_index_row + delta_y;
+    // max y pos
+    max_y_pos = ILI9341_SIZE_Y - delta_y;
+    // control if will be in range
+    check = ILI9341_CheckPosition(new_x_pos, new_y_pos, max_y_pos, size);
+    // update position
+    if (ILI9341_SUCCESS == check) {
+      // read characters and increment index
+      ILI9341_DrawChar(str[i++], color, size);
+    }
+  }
+}
+
+/**
+ * @desc    LCD Set text position x, y
+ *
+ * @param   uint16_t x - position
+ * @param   uint16_t y - position
+ *
+ * @return  char
+ */
+char ILI9341_SetPosition(uint16_t x, uint16_t y)
+{
+  // check if coordinates is out of range
+  if ((x > ILI9341_SIZE_X) && (y > ILI9341_SIZE_Y)) {
+    // error
+    return ILI9341_ERROR;
+
+  } else if ((x > ILI9341_SIZE_X) && (y <= ILI9341_SIZE_Y)) {
+    // set position y
+    _ili9341_cache_index_row = y;
+    // set position x
+    _ili9341_cache_index_col = 2;
+  } else {
+    // set position y 
+    _ili9341_cache_index_row = y;
+    // set position x
+    _ili9341_cache_index_col = x;
+  }
+  // return exit
+  return ILI9341_SUCCESS;
+}
+
+/**
+ * @desc    Check text position x, y
+ *
+ * @param   uint16_t x - position
+ * @param   uint16_t y - position
+ * @param   ILI9341_Sizes
+ *
+ * @return  char
+ */
+char ILI9341_CheckPosition(uint16_t x, uint16_t y, uint16_t max_y, ILI9341_Sizes size)
+{
+  // check if coordinates is out of range
+  if ((x > ILI9341_SIZE_X) && (y > max_y)) {
+    // error
+    return ILI9341_ERROR;
+
+  }
+  // if next line
+  if ((x > ILI9341_SIZE_X) && (y <= max_y)) {
+    // set position y
+    _ili9341_cache_index_row = y;
+    // set position x
+    _ili9341_cache_index_col = 2;
+  } 
+  // return exit
+  return ILI9341_SUCCESS;
 }
 
 /**

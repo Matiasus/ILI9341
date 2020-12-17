@@ -147,6 +147,18 @@
   // whole pixels
   #define ILI9341_CACHE_MEM     (ILI9341_MAX_X * ILI9341_MAX_Y)
 
+  /** @enum Font sizes */
+  typedef enum {
+    // 1x high & 1x wide size
+    X1 = 0x00,
+    // 2x high & 1x wide size
+    X2 = 0x80,
+    // 2x high & 2x wider size
+    // 0x0A is set because need to offset 5 position to right
+    //      when draw the characters of string 
+    X3 = 0x81
+  } ILI9341_Sizes;
+
   /** @const Command list ILI9341B */
   extern const uint8_t INIT_ILI9341[];
 
@@ -283,8 +295,7 @@
   void ILI9341_UpdateScreen (void);
 
   /**
-   * @desc    LCD Draw line by Bresenham algoritm
-   * @surce   https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+   * @desc    LCD Draw line by Bresenham algoritm - depend on MADCTL
    *  
    * @param   uint16_t   x start position / 0 <= cols <= ILI9341_SIZE_X
    * @param   uint16_t   x end position   / 0 <= cols <= ILI9341_SIZE_X
@@ -295,6 +306,73 @@
    * @return  void
    */
   void ILI9341_DrawLine(uint16_t, uint16_t, uint16_t, uint16_t, uint16_t);
+
+  /**
+   * @desc    LCD Fast draw line horizontal - depend on MADCTL
+   *
+   * @param   uint16_t - x start position
+   * @param   uint16_t - x end position
+   * @param   uint16_t - y position
+   * @param   uint16_t - color
+   *
+   * @return  char
+   */
+  char ILI9341_DrawLineHorizontal (uint16_t, uint16_t, uint16_t, uint16_t);
+
+  /**
+   * @desc    LCD Fast draw line vertical - depend on MADCTL
+   *
+   * @param   uint16_t - x position
+   * @param   uint16_t - y start position
+   * @param   uint16_t - y end position
+   * @param   uint16_t - color
+   *
+   * @return  char
+   */
+  char ILI9341_DrawLineVertical (uint16_t, uint16_t, uint16_t, uint16_t);
+
+  /**
+   * @desc    LCD Draw character 2x larger
+   *
+   * @param   char -> character
+   * @param   uint16_t -> color
+   * @param   ILI9341_Sizes -> size
+   *
+   * @return  void
+   */
+  char ILI9341_DrawChar (char, uint16_t, ILI9341_Sizes);
+
+  /**
+   * @desc    LCD Check text position x, y
+   *
+   * @param   uint16_t x -> position
+   * @param   uint16_t y -> position
+   * @param   ILI9341_Sizes
+   *
+   * @return  char
+   */
+  char ILI9341_CheckPosition(uint16_t, uint16_t, uint16_t, ILI9341_Sizes);
+
+  /**
+   * @desc    LCD Set text position x, y
+   *
+   * @param   uint16_t x - position
+   * @param   uint16_t y - position
+   *
+   * @return  char
+   */
+  char ILI9341_SetPosition(uint16_t, uint16_t);
+
+  /**
+   * @desc    Draw string
+   *
+   * @param   char* -> string 
+   * @param   uint16_t -> color
+   * @param   ILI9341_Sizes
+   *
+   * @return  void
+   */
+  void ILI9341_DrawString (char*, uint16_t, ILI9341_Sizes);
 
   /**
    * @desc    Delay
