@@ -7,14 +7,14 @@ Detailed information are described in [Datasheet ILI9341](https://cdn-shop.adafr
 C library is aimed for driving [ILI9341 2.8 TFT LCD display](#demonstration) 240x320 using 8080-I/II Series Parallel Interface.
 
 ## Hardware connection
-- 5V => 5V
-- 3.3V => NC, 
-- GND => GND, 
-- RST => PORTD[4]
-- CS => PORTD[3]
-- RS => PORTD[2]
-- WR => PORTD[1]
-- RD => PORTD[0]
+- 5V     => 5V
+- 3.3V   => NC, 
+- GND    => GND, 
+- RST    => PORTD[4]
+- CS     => PORTD[3]
+- RS     => PORTD[2]
+- WR     => PORTD[1]
+- RD     => PORTD[0]
 - D[7:0] => PORTD[7:0]
 
 ### Usage
