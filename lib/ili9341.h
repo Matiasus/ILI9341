@@ -111,6 +111,7 @@
   // Extend register commands
   // --------------------------------------------------------------- 
   // @source https://github.com/fagcinsk/stm-ILI9341-spi/blob/master/lib/ILI9341/commands.h
+  //
   #define ILI9341_LCD_POWERA    0xCB   // Power control A register
   #define ILI9341_LCD_POWERB    0xCF   // Power control B register
   #define ILI9341_LCD_DTCA      0xE8   // Driver timing control A
@@ -123,7 +124,15 @@
   #define SETBIT(REG, BIT)      { REG |= (1 << BIT); }
   // clear bit
   #define CLRBIT(REG, BIT)      { REG &= ~(1 << BIT); }
-  // WR Impulse
+
+  // WR Impulse - condition
+  // ---------------------------------------------------------------
+  // Write Control pulse H duration -> twrh > 15ns
+  // Write Control pulse L duration -> twrl > 15ns
+  // ---------------------------------------------------------------
+  // for 16 MHz crystal T = 62.5ns =>
+  // T pulse H -> Th = 31.25ns > twrh - condition satisfied
+  // T pulse L -> Tl = 31.25ns > twrl - condition satisfied
   #define WR_IMPULSE()          { ILI9341_PORT_CONTROL &= ~(1 << ILI9341_PIN_WR); ILI9341_PORT_CONTROL |= (1 << ILI9341_PIN_WR); }
 
   // SOFTWARE DEFINITION

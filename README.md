@@ -34,3 +34,4 @@ Library was tested and proved on a **_ILI9341 2.8″ TFT Dispay_** with **_Atmeg
 - [Adafuit TFT](https://github.com/adafruit/TFTLCD-Library)
 - [notro](https://github.com/notro/fbtft/blob/master/fb_ili9341.c)
 - [thefallenidealist](https://github.com/thefallenidealist/ili9341/blob/master/glcd.c)
+- [fagcinsk](https://github.com/fagcinsk/stm-ILI9341-spi/blob/master/lib/ILI9341/commands.h)
