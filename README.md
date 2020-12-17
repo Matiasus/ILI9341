@@ -18,16 +18,6 @@ C library is aimed for driving [ILI9341 2.8 TFT LCD display](#demonstration) 240
 | WR | PORTD 1 | Write |
 | RD | PORTD 0 | Read |
 
-- 5V     => 5V
-- 3.3V   => NC, 
-- GND    => GND, 
-- RST    => PORTD[4]
-- CS     => PORTD[3]
-- RS     => PORTD[2]
-- WR     => PORTD[1]
-- RD     => PORTD[0]
-- D[7:0] => PORTD[7:0]
-
 ### Usage
 Prior defined for MCU Atmega328p / Atmega8 / Atmega16. Need to be carefull with pins definition. **_Data pins D[7:0] using one port and are in order!_**.
 
