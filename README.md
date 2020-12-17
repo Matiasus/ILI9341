@@ -7,6 +7,17 @@ Detailed information are described in [Datasheet ILI9341](https://cdn-shop.adafr
 C library is aimed for driving [ILI9341 2.8 TFT LCD display](#demonstration) 240x320 using 8080-I/II Series Parallel Interface.
 
 ## Hardware connection
+| PORT LCD | PORT ATMEGA328P | Description |
+| :---: | :---: |  :---: |
+| 5V | 5V | Supply Voltage |
+| 3.3V | NC | Not Connected |
+| GND | GND | Ground |
+| RST | PORTD 4 | Reset |
+| CS | PORTD 3 | Chip Select |
+| RS | PORTD 2 | Register Select (Data / Command) |
+| WR | PORTD 1 | Write |
+| RD | PORTD 0 | Read |
+
 - 5V     => 5V
 - 3.3V   => NC, 
 - GND    => GND, 
