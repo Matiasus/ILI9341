@@ -45,8 +45,7 @@ int main(void)
   // set position
   ILI9341_SetPosition(2, 60);  
   // draw string
-  ILI9341_DrawString("The HiFi Engine library has images, specifications and reviews for thousands of audio components, along with free downloads of owners manuals, service manuals, schematics and product catalogues for amplifiers, pre-amps, power amps, tuners, tape decks, cd players etc.", 0xffff, X1);
-
+  ILI9341_DrawString("The HiFi Engine library has images, specifications and reviews for thousands of audio components, along with free downloads of owners manuals, service manuals, schematics and product catalogues for amplifiers, pre-amps, power amps, tuners, tape decks, cd players etc.", 0xffff, X2);
 
   // EXIT
   // ------------------------------------------------- 

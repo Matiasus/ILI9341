@@ -784,7 +784,7 @@ void ILI9341_DrawString (char *str, uint16_t color, ILI9341_Sizes size)
  *
  * @return  char
  */
-char ILI9341_CheckPosition(uint16_t x, uint16_t y, uint16_t max_y, ILI9341_Sizes size)
+char ILI9341_CheckPosition (uint16_t x, uint16_t y, uint16_t max_y, ILI9341_Sizes size)
 {
   // check if coordinates is out of range
   if ((x > ILI9341_SIZE_X) && (y > max_y)) {  
@@ -810,7 +810,7 @@ char ILI9341_CheckPosition(uint16_t x, uint16_t y, uint16_t max_y, ILI9341_Sizes
  *
  * @return  char
  */
-char ILI9341_SetPosition(uint16_t x, uint16_t y)
+char ILI9341_SetPosition (uint16_t x, uint16_t y)
 {
   // check if coordinates is out of range
   if ((x > ILI9341_SIZE_X) && (y > ILI9341_SIZE_Y)) {
@@ -835,11 +835,11 @@ char ILI9341_SetPosition(uint16_t x, uint16_t y)
 /**
  * @desc    Delay
  *
- * @param   unsigned short int
+ * @param   uint16_t
  *
  * @return  void
  */
-void ILI9341_Delay(unsigned short int time)
+void ILI9341_Delay (uint16_t time)
 {
   // loop through real time
   while (time--) {

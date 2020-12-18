@@ -386,10 +386,10 @@
   /**
    * @desc    Delay
    *
-   * @param   unsigned short int
+   * @param   uint16_t
    *
    * @return  void
    */
-  void ILI9341_Delay (unsigned short int);
+  void ILI9341_Delay (uint16_t);
 
 #endif
