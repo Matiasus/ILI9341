@@ -676,7 +676,7 @@ char ILI9341_DrawChar (char character, uint16_t color, ILI9341_Sizes size)
       idxRow = CHARS_ROWS_LENGTH;
     }
     // update x position
-    _ili9341_cache_index_col = _ili9341_cache_index_col + CHARS_ROWS_LENGTH;
+    _ili9341_cache_index_col += CHARS_COLS_LENGTH + 1;
   
   // --------------------------------------
   // SIZE X2 - font 2x higher, normal wide
@@ -701,7 +701,7 @@ char ILI9341_DrawChar (char character, uint16_t color, ILI9341_Sizes size)
       idxRow = CHARS_ROWS_LENGTH;
     }
     // update x position
-    _ili9341_cache_index_col = _ili9341_cache_index_col + CHARS_ROWS_LENGTH;
+    _ili9341_cache_index_col += CHARS_COLS_LENGTH + 2;
 
   // --------------------------------------
   // SIZE X3 - font 2x higher, 2x wider
@@ -729,8 +729,8 @@ char ILI9341_DrawChar (char character, uint16_t color, ILI9341_Sizes size)
       // fill index row again
       idxRow = CHARS_ROWS_LENGTH;
     }
-    // update x position
-    _ili9341_cache_index_col = _ili9341_cache_index_col + CHARS_ROWS_LENGTH + CHARS_ROWS_LENGTH;
+    // update x position *2
+    _ili9341_cache_index_col += (CHARS_COLS_LENGTH << 1) + 2;
   }
   // return exit
   return ILI9341_SUCCESS;
@@ -749,11 +749,11 @@ void ILI9341_DrawString (char *str, uint16_t color, ILI9341_Sizes size)
 {
   // variables
   unsigned int i = 0;
-  unsigned char check;
-  unsigned char delta_y;
-  unsigned char max_y_pos;
-  unsigned char new_x_pos;
-  unsigned char new_y_pos;
+  char check;
+  uint16_t delta_y;
+  uint16_t max_y_pos;
+  uint16_t new_x_pos;
+  uint16_t new_y_pos;
 
   // loop through character of string
   while (str[i] != '\0') {
@@ -776,6 +776,33 @@ void ILI9341_DrawString (char *str, uint16_t color, ILI9341_Sizes size)
 }
 
 /**
+ * @desc    Check text position x, y
+ *
+ * @param   uint16_t x - position
+ * @param   uint16_t y - position
+ * @param   ILI9341_Sizes
+ *
+ * @return  char
+ */
+char ILI9341_CheckPosition(uint16_t x, uint16_t y, uint16_t max_y, ILI9341_Sizes size)
+{
+  // check if coordinates is out of range
+  if ((x > ILI9341_SIZE_X) && (y > max_y)) {  
+    // error
+    return ILI9341_ERROR;
+  }
+  // if next line
+  if ((x > ILI9341_SIZE_X) && (y <= max_y)) {
+    // set position y
+    _ili9341_cache_index_row = y;
+    // set position x
+    _ili9341_cache_index_col = 2;
+  } 
+  // return exit
+  return ILI9341_SUCCESS;
+}
+
+/**
  * @desc    LCD Set text position x, y
  *
  * @param   uint16_t x - position
@@ -789,7 +816,7 @@ char ILI9341_SetPosition(uint16_t x, uint16_t y)
   if ((x > ILI9341_SIZE_X) && (y > ILI9341_SIZE_Y)) {
     // error
     return ILI9341_ERROR;
-
+  // x overflow, y in range
   } else if ((x > ILI9341_SIZE_X) && (y <= ILI9341_SIZE_Y)) {
     // set position y
     _ili9341_cache_index_row = y;
@@ -801,34 +828,6 @@ char ILI9341_SetPosition(uint16_t x, uint16_t y)
     // set position x
     _ili9341_cache_index_col = x;
   }
-  // return exit
-  return ILI9341_SUCCESS;
-}
-
-/**
- * @desc    Check text position x, y
- *
- * @param   uint16_t x - position
- * @param   uint16_t y - position
- * @param   ILI9341_Sizes
- *
- * @return  char
- */
-char ILI9341_CheckPosition(uint16_t x, uint16_t y, uint16_t max_y, ILI9341_Sizes size)
-{
-  // check if coordinates is out of range
-  if ((x > ILI9341_SIZE_X) && (y > max_y)) {
-    // error
-    return ILI9341_ERROR;
-
-  }
-  // if next line
-  if ((x > ILI9341_SIZE_X) && (y <= max_y)) {
-    // set position y
-    _ili9341_cache_index_row = y;
-    // set position x
-    _ili9341_cache_index_col = 2;
-  } 
   // return exit
   return ILI9341_SUCCESS;
 }
