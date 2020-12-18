@@ -7,12 +7,16 @@
  *
  * @author      Marian Hrinko
  * @datum       12.12.2020
+ * @update      13.12.2020
  * @file        main.c
- * @tested      AVR Atmega16
+ * @version     1.0
+ * @tested      AVR Atmega328p
  *
  * @depend      ili9341.h
  * --------------------------------------------------------------------------------------------+
- * @inspir      
+ * @interface   8080-I Series Parallel Interface
+ * @pins        5V, 3.3V -> NC, GND, RST, CS, RS, WR, RD, D[7:0]
+ *     
  */
 #include <util/delay.h>
 #include "lib/ili9341.h"
@@ -38,14 +42,9 @@ int main(void)
   ILI9341_DrawLineHorizontal(10, ILI9341_MAX_X - 10, 50, ILI9341_WHITE);
 
   // set position
-  ILI9341_SetPosition(10, 25);  
+  ILI9341_SetPosition(11, 25);  
   // draw string
   ILI9341_DrawString("ILI9341 LCD DRIVER", 0xcff0, X3);
-
-  // set position
-  ILI9341_SetPosition(2, 60);  
-  // draw string
-  ILI9341_DrawString("The HiFi Engine library has images, specifications and reviews for thousands of audio components, along with free downloads of owners manuals, service manuals, schematics and product catalogues for amplifiers, pre-amps, power amps, tuners, tape decks, cd players etc.", 0xffff, X2);
 
   // EXIT
   // ------------------------------------------------- 

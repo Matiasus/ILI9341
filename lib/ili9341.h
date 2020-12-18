@@ -8,11 +8,13 @@
  * @author      Marian Hrinko
  * @datum       10.12.2020
  * @file        ili9341.h
- * @tested      AVR Atmega16
+ * @update      13.12.2020
+ * @version     1.0
+ * @tested      AVR Atmega328p
  *
- * @depend      spi, font
+ * @depend      font
  * ---------------------------------------------------------------+
- * @interface   8080-I/II Series Parallel Interface
+ * @interface   8080-I Series Parallel Interface
  * @pins        5V, 3.3V -> NC, GND, RST, CS, RS, WR, RD, D[7:0] 
  *
  */
@@ -205,7 +207,7 @@
    *
    * @return  void
    */
-  void ILI9341_TransmitCmmd (char);
+  void ILI9341_TransmitCmmd (uint8_t);
 
   /**
    * @desc    LCD Transmit 8 bits data
@@ -306,11 +308,11 @@
   /**
    * @desc    LCD Draw line by Bresenham algoritm - depend on MADCTL
    *  
-   * @param   uint16_t   x start position / 0 <= cols <= ILI9341_SIZE_X
-   * @param   uint16_t   x end position   / 0 <= cols <= ILI9341_SIZE_X
-   * @param   uint16_t   y start position / 0 <= rows <= ILI9341_SIZE_Y 
-   * @param   uint16_t   y end position   / 0 <= rows <= ILI9341_SIZE_Y
-   * @param   uint16_t  color
+   * @param   uint16_t - x start position / 0 <= cols <= ILI9341_SIZE_X
+   * @param   uint16_t - x end position   / 0 <= cols <= ILI9341_SIZE_X
+   * @param   uint16_t - y start position / 0 <= rows <= ILI9341_SIZE_Y 
+   * @param   uint16_t - y end position   / 0 <= rows <= ILI9341_SIZE_Y
+   * @param   uint16_t - color
    *
    * @return  void
    */
@@ -354,8 +356,9 @@
   /**
    * @desc    LCD Check text position x, y
    *
-   * @param   uint16_t x -> position
-   * @param   uint16_t y -> position
+   * @param   uint16_t x
+   * @param   uint16_t y
+   * @param   uint16_t max_y
    * @param   ILI9341_Sizes
    *
    * @return  char
@@ -377,7 +380,7 @@
    *
    * @param   char* -> string 
    * @param   uint16_t -> color
-   * @param   ILI9341_Sizes
+   * @param   ILI9341_Sizes -> size
    *
    * @return  void
    */

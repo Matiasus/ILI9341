@@ -9,12 +9,14 @@
  * @datum       10.12.2020
  * @update      13.12.2020
  * @file        ili9341.c
- * @tested      AVR Atmega16
+ * @version     1.0
+ * @tested      AVR Atmega328p
  *
  * @depend      font
  * -----------------------------------------------------------------------+
- * @inspir      https://github.com/notro/fbtft/blob/master/fb_ili9341.c
-                https://github.com/adafruit/Adafruit_ILI9341/blob/master/Adafruit_ILI9341.cpp
+ * @interface   8080-I Series Parallel Interface
+ * @pins        5V, 3.3V -> NC, GND, RST, CS, RS, WR, RD, D[7:0] 
+ *
  */
 
 #include <avr/pgmspace.h>
@@ -103,18 +105,15 @@ void ILI9341_Init (void)
 
   // loop throuh commands
   while (no_of_commands--) {
-
     // number of arguments
     no_of_arguments = pgm_read_byte(commands++);
     // delay
     delay = pgm_read_byte(commands++);
     // command
     command = pgm_read_byte(commands++);
-
     // send command
     // -------------------------    
     ILI9341_TransmitCmmd(command);
-
     // send arguments
     // -------------------------
     while (no_of_arguments--) {
@@ -200,18 +199,18 @@ void ILI9341_HWReset (void)
 /**
  * @desc    LCD Transmit Command
  *
- * @param   char
+ * @param   uint8_t
  *
  * @return  void
  */
-void ILI9341_TransmitCmmd (char cmmd)
+void ILI9341_TransmitCmmd (uint8_t cmmd)
 {
   // D/C -> LOW
   CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_RS);
   // enable chip select -> LOW
   CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS);
 
-  // Write data timing diagram
+  // Write data / command timing diagram
   // --------------------------------------------
   //              ___
   // D0 - D7:  __/   \__
@@ -220,7 +219,7 @@ void ILI9341_TransmitCmmd (char cmmd)
 
   // set command on PORT
   ILI9341_PORT_DATA = cmmd;
-  // WR -> LOW
+  // Write impulse
   WR_IMPULSE();
 
   // D/C -> HIGH
@@ -243,7 +242,7 @@ void ILI9341_Transmit8bitData (uint8_t data)
   // enable chip select -> LOW
   CLRBIT(ILI9341_PORT_CONTROL, ILI9341_PIN_CS);
 
-  // Write data timing diagram
+  // Write data / command timing diagram
   // --------------------------------------------
   //              ___
   // D0 - D7:  __/   \__
@@ -252,7 +251,7 @@ void ILI9341_Transmit8bitData (uint8_t data)
 
   // set data on PORT
   ILI9341_PORT_DATA = data;
-  // WR -> LOW
+  // Write impulse
   WR_IMPULSE();
 
   // disable chip select -> HIGH
@@ -280,14 +279,18 @@ void ILI9341_Transmit16bitData (uint16_t data)
   //          __    __
   //      WR:   \__/
 
-  // set higher 8 bit data on PORT
+  // set byte data on PORT
+  //   __
+  // 0x0000
   ILI9341_PORT_DATA = (uint8_t) (data >> 8);
-  // WR -> LOW
+  // Write impulse
   WR_IMPULSE();
 
-  // set lower 8 bit data on PORT
+  // set byte data on PORT
+  //     __
+  // 0x0000
   ILI9341_PORT_DATA = (uint8_t) data;
-  // WR -> LOW
+  // Write impulse
   WR_IMPULSE();
 
   // disable chip select -> HIGH
@@ -315,24 +318,32 @@ void ILI9341_Transmit32bitData (uint32_t data)
   //          __    __
   //      WR:   \__/
 
-  // set higher 8 bit data on PORT
+  // set byte data on PORT
+  //   __
+  // 0x00000000
   ILI9341_PORT_DATA = (uint8_t) (data >> 24);
-  // WR -> LOW
+  // Write impulse
   WR_IMPULSE();
 
-  // set higher 8 bit data on PORT
+  // set byte data on PORT
+  //     __
+  // 0x00000000
   ILI9341_PORT_DATA = (uint8_t) (data >> 16);
-  // WR -> LOW
+  // Write impulse
   WR_IMPULSE();
 
-  // set higher 8 bit data on PORT
+  // set byte data on PORT
+  //       __
+  // 0x00000000
   ILI9341_PORT_DATA = (uint8_t) (data >> 8);
-  // WR -> LOW
+  // Write impulse
   WR_IMPULSE();
 
-  // set lower 8 bit data on PORT
+  // set byte data on PORT
+  //         __
+  // 0x00000000
   ILI9341_PORT_DATA = (uint8_t) data;
-  // WR -> LOW
+  // Write impulse
   WR_IMPULSE();
 
   // disable chip select -> HIGH
@@ -410,9 +421,7 @@ void ILI9341_SendColor565 (uint16_t color, uint32_t count)
   // counter
   while (count--) {
     // write color - first colors byte
-    ILI9341_Transmit8bitData((uint8_t) (color >> 8));
-    // write color - second color byte
-    ILI9341_Transmit8bitData((uint8_t) color);
+    ILI9341_Transmit16bitData(color);
   }
 }
 
@@ -472,13 +481,13 @@ void ILI9341_UpdateScreen (void)
 
 /**
  * @desc    Draw line by Bresenham algoritm
- * @surce   https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+ * @source  https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
  *  
- * @param   uint8_t   x start position / 0 <= cols <= ILI9341_SIZE_X
- * @param   uint8_t   x end position   / 0 <= cols <= ILI9341_SIZE_X
- * @param   uint8_t   y start position / 0 <= rows <= ILI9341_SIZE_Y 
- * @param   uint8_t   y end position   / 0 <= rows <= ILI9341_SIZE_Y
- * @param   uint16_t  color
+ * @param   uint16_t - x start position / 0 <= cols <= ILI9341_SIZE_X
+ * @param   uint16_t - x end position   / 0 <= cols <= ILI9341_SIZE_X
+ * @param   uint16_t - y start position / 0 <= rows <= ILI9341_SIZE_Y 
+ * @param   uint16_t - y end position   / 0 <= rows <= ILI9341_SIZE_Y
+ * @param   uint16_t - color
  *
  * @return  void
  */
@@ -741,7 +750,7 @@ char ILI9341_DrawChar (char character, uint16_t color, ILI9341_Sizes size)
  *
  * @param   char* -> string 
  * @param   uint16_t -> color
- * @param   ILI9341_Sizes
+ * @param   ILI9341_Sizes -> size
  *
  * @return  void
  */
@@ -778,8 +787,9 @@ void ILI9341_DrawString (char *str, uint16_t color, ILI9341_Sizes size)
 /**
  * @desc    Check text position x, y
  *
- * @param   uint16_t x - position
- * @param   uint16_t y - position
+ * @param   uint16_t
+ * @param   uint16_t
+ * @param   uint16_t
  * @param   ILI9341_Sizes
  *
  * @return  char
