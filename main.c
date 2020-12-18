@@ -44,7 +44,7 @@ int main(void)
   // set position
   ILI9341_SetPosition(11, 25);  
   // draw string
-  ILI9341_DrawString("ILI9341 LCD DRIVER", 0xcff0, X3);
+  ILI9341_DrawString("ILI9341 LCD DRIVER", ILI9341_RED, X3);
 
   // EXIT
   // ------------------------------------------------- 
