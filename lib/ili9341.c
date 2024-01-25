@@ -591,7 +591,7 @@ char ILI9341_DrawLineHorizontal (uint16_t xs, uint16_t xe, uint16_t y, uint16_t 
   // check if start is > as end  
   if (xs > xe) {
     // temporary safe
-    temp = xs;
+    temp = xe;
     // start change for end
     xe = xs;
     // end change for start
@@ -627,7 +627,7 @@ char ILI9341_DrawLineVertical (uint16_t x, uint16_t ys, uint16_t ye, uint16_t co
   // check if start is > as end
   if (ys > ye) {
     // temporary safe
-    temp = ys;
+    temp = ye;
     // start change for end
     ye = ys;
     // end change for start
